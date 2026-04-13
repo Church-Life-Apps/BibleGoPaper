@@ -4,65 +4,45 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-    node distance=1.1cm and 0.8cm,
-    block/.style={rectangle, draw=pipeline!40, fill=pipeline!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
-    data/.style={rectangle, draw=tier1!40, fill=tier1!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
-    output/.style={rectangle, draw=accent!40, fill=accent!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
+    node distance=0.5cm,
+    block/.style={rectangle, draw=pipeline!40, fill=pipeline!8, text width=4.5cm, minimum height=0.7cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
+    data/.style={rectangle, draw=tier1!40, fill=tier1!8, text width=4.5cm, minimum height=0.7cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
+    output/.style={rectangle, draw=accent!40, fill=accent!8, text width=4.5cm, minimum height=0.7cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
     arrow/.style={-{Stealth[length=2mm]}, line width=0.6pt, color=pipeline!70},
-    techlabel/.style={font=\tiny\sffamily\itshape, color=pipeline!70}
+    grouplabel/.style={font=\tiny\sffamily\bfseries, anchor=east}
 ]
-% Data sources (side by side)
-\node[data] (bible) {NASB Bible\\(66 books)};
-\node[data, right=of bible] (comm) {Commentary\\Corpus (20+)};
+% Data sources
+\node[data] (data) {NASB Bible (66 books) + Commentary Corpus (20+)};
 
-% Pipeline row 1
-\node[block, below=1.0cm of bible] (extract) {Quote\\Extraction};
-\node[block, right=of extract] (retrieve) {Retrieval\\(FAISS)};
-
-% Pipeline row 2
-\node[block, below=of extract] (generate) {BHT\\Generation};
-\node[block, right=of generate] (score) {Scoring \&\\Validation};
-
-% Pipeline row 3
-\node[block, below=of generate] (footnote) {Footnoting\\+ Tagging};
+% Pipeline steps - straight vertical
+\node[block, below=0.8cm of data] (extract) {1. Quote Extraction \quad {\tiny\itshape GPT-3.5}};
+\node[block, below=of extract] (retrieve) {2. Retrieval \quad {\tiny\itshape FAISS + HuggingFace}};
+\node[block, below=of retrieve] (generate) {3. BHT Generation \quad {\tiny\itshape GPT-3.5}};
+\node[block, below=of generate] (score) {4. Scoring \& Validation \quad {\tiny\itshape USE + textstat}};
+\node[block, below=of score] (footnote) {5. Footnoting + Tagging \quad {\tiny\itshape Cross-encoder}};
 
 % Output
-\node[output, below=1.0cm of footnote] (db) {PostgreSQL};
-\node[output, right=of db] (webapp) {BibleGo.org};
+\node[output, below=0.8cm of footnote] (deploy) {PostgreSQL $\rightarrow$ BibleGo.org (Next.js)};
 
-% Arrows - data to pipeline
-\draw[arrow] (bible.south) -- (extract.north);
-\draw[arrow] (comm.south) -- ++(0,-0.3) -| (extract.north east);
-\draw[arrow] (comm.south) -- (retrieve.north);
-
-% Arrows - pipeline flow
+% Arrows
+\draw[arrow] (data) -- (extract);
 \draw[arrow] (extract) -- (retrieve);
-\draw[arrow] (retrieve.south) -- ++(0,-0.2) -| (generate.north east);
+\draw[arrow] (retrieve) -- (generate);
 \draw[arrow] (generate) -- (score);
-\draw[arrow] (score.south) -- ++(0,-0.2) -| (footnote.north east);
-
-% Tech labels - placed below each box with enough clearance
-\node[techlabel, below=0.12cm of extract] {GPT-3.5};
-\node[techlabel, below=0.12cm of retrieve] {HuggingFace};
-\node[techlabel, below=0.12cm of generate] {GPT-3.5};
-\node[techlabel, below=0.12cm of score] {USE + textstat};
-\node[techlabel, below=0.12cm of footnote] {Cross-encoder};
-
-% Arrows - to deployment
-\draw[arrow] (footnote.south) -- ++(0,-0.55) -- (db.north);
-\draw[arrow] (db) -- (webapp);
+\draw[arrow] (score) -- (footnote);
+\draw[arrow] (footnote) -- (deploy);
 
 % Background groups
 \begin{scope}[on background layer]
-    \node[fit=(bible)(comm), fill=tier1!5, draw=none, rounded corners=4pt, inner sep=6pt] {};
-    \node[fit=(extract)(retrieve)(generate)(score)(footnote), fill=pipeline!5, draw=none, rounded corners=4pt, inner sep=10pt, inner ysep=14pt] {};
-    \node[fit=(db)(webapp), fill=accent!5, draw=none, rounded corners=4pt, inner sep=6pt] {};
+    \node[fit=(data), fill=tier1!5, draw=none, rounded corners=4pt, inner sep=5pt] {};
+    \node[fit=(extract)(retrieve)(generate)(score)(footnote), fill=pipeline!5, draw=none, rounded corners=4pt, inner sep=8pt] {};
+    \node[fit=(deploy), fill=accent!5, draw=none, rounded corners=4pt, inner sep=5pt] {};
 \end{scope}
 
 % Group labels
-\node[font=\tiny\sffamily\bfseries, tier1, above=0.3cm of bible.north east] {Data Sources};
-\node[font=\tiny\sffamily\bfseries, pipeline, left=0.3cm of extract.west, anchor=east, yshift=-0.8cm] {Pipeline};
-\node[font=\tiny\sffamily\bfseries, accent, left=0.3cm of db.west, anchor=east] {Deploy};
+\node[grouplabel, tier1] at ([xshift=-0.3cm]data.west) {Data};
+\node[grouplabel, pipeline] at ([xshift=-0.3cm]generate.west) {Pipeline};
+\node[grouplabel, accent] at ([xshift=-0.3cm]deploy.west) {Deploy};
 \end{tikzpicture}
 \caption{End-to-end system architecture. Commentary and Bible text flow through the five-phase AI pipeline, producing scored BHTs with footnotes that are stored in PostgreSQL and served via BibleGo.org.}
 \label{fig:architecture}
