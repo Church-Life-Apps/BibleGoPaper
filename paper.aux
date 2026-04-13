@@ -1,0 +1,132 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{lewis2020rag}
+\citation{cer2018use,reimers2019sentencebert}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:introduction}{{1}{1}{Introduction}{section.1}{}}
+\citation{devlin2019bert}
+\citation{vaswani2017attention}
+\citation{lewis2020rag}
+\citation{cer2018use}
+\citation{reimers2019sentencebert}
+\citation{johnson2019faiss}
+\citation{nllb2022translate}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Abstractive and extractive summarization.}{2}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Retrieval-augmented generation.}{2}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Semantic similarity and sentence embeddings.}{2}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{AI in digital humanities and biblical studies.}{2}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}System Architecture}{3}{section.3}\protected@file@percent }
+\newlabel{sec:architecture}{{3}{3}{System Architecture}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Data Sources}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Biblical text.}{3}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Commentary corpus.}{3}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Commentator Tiering}{3}{subsection.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Tier~1 New Testament commentators.}}{3}{table.caption.9}\protected@file@percent }
+\newlabel{tab:commentators}{{1}{3}{Tier~1 New Testament commentators}{table.caption.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Prompt Engineering}{3}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Commentary Digitization}{3}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Alford's New Testament for English Readers.}{3}{section*.10}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces End-to-end system architecture. Commentary and Bible text flow through the five-phase AI pipeline, producing scored BHTs with footnotes that are stored in PostgreSQL and served via the BibleGo.org web application.}}{4}{figure.caption.6}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:architecture}{{1}{4}{End-to-end system architecture. Commentary and Bible text flow through the five-phase AI pipeline, producing scored BHTs with footnotes that are stored in PostgreSQL and served via the BibleGo.org web application}{figure.caption.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Govett's Commentary on Revelation.}{4}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Original Language Tagging}{4}{subsection.3.5}\protected@file@percent }
+\citation{openai2023gpt35}
+\citation{chase2022langchain}
+\citation{song2020mpnet}
+\citation{johnson2019faiss}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Commentary digitization pipeline used for Alford's and Govett's commentaries.}}{5}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:digitization}{{2}{5}{Commentary digitization pipeline used for Alford's and Govett's commentaries}{figure.caption.11}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Methods}{5}{section.4}\protected@file@percent }
+\newlabel{sec:methods}{{4}{5}{Methods}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Phase 1: Quote Extraction}{5}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Phase 2: Retrieval}{5}{subsection.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces BHT generation flow. Each verse undergoes quote extraction, tiered grouping, constrained generation with up to five retry attempts, quality scoring, and footnote linking.}}{5}{figure.caption.13}\protected@file@percent }
+\newlabel{fig:bhtflow}{{3}{5}{BHT generation flow. Each verse undergoes quote extraction, tiered grouping, constrained generation with up to five retry attempts, quality scoring, and footnote linking}{figure.caption.13}{}}
+\citation{cer2018use}
+\citation{kincaid1975readability,gunning1952fog}
+\citation{reimers2019sentencebert}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Phase 3: BHT Generation}{6}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Phase 4: Split-BHT Variant}{6}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Phase 5: Scoring and Validation}{6}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hard constraints.}{6}{section*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Continuous metrics.}{6}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Phase 6: Footnoting and Tagging}{6}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Footnoting.}{6}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Commentary tagging.}{6}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}The OT Challenge}{6}{subsection.4.7}\protected@file@percent }
+\newlabel{sec:otchallenge}{{4.7}{6}{The OT Challenge}{subsection.4.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Evaluation}{7}{section.5}\protected@file@percent }
+\newlabel{sec:evaluation}{{5}{7}{Evaluation}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Aggregate Quality Metrics}{7}{subsection.5.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Aggregate BHT quality metrics across testaments. Values are mean $\pm $ standard deviation.}}{7}{table.caption.18}\protected@file@percent }
+\newlabel{tab:aggregate}{{2}{7}{Aggregate BHT quality metrics across testaments. Values are mean $\pm $ standard deviation}{table.caption.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Generation Strategy Comparison}{7}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Generation strategy comparison across OT verses.}}{7}{table.caption.19}\protected@file@percent }
+\newlabel{tab:strategy}{{3}{7}{Generation strategy comparison across OT verses}{table.caption.19}{}}
+\citation{openai2023gpt35}
+\citation{groq2024llama}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Average quality scores by generation strategy across OT verses.}}{8}{figure.caption.20}\protected@file@percent }
+\newlabel{fig:strategy}{{4}{8}{Average quality scores by generation strategy across OT verses}{figure.caption.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Generation Attempt Analysis}{8}{subsection.5.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Average quality score by generation attempt number (1--5). Later attempts benefit from the system's retry logic but show diminishing returns.}}{8}{figure.caption.21}\protected@file@percent }
+\newlabel{fig:attempts}{{5}{8}{Average quality score by generation attempt number (1--5). Later attempts benefit from the system's retry logic but show diminishing returns}{figure.caption.21}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Commentator Tier Contribution}{8}{subsection.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Quality Score Distribution}{8}{subsection.5.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Average commentator tier similarity scores. Tier~1 consistently contributes the most to BHT content, as intended by the prompt design.}}{8}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:tiers}{{6}{8}{Average commentator tier similarity scores. Tier~1 consistently contributes the most to BHT content, as intended by the prompt design}{figure.caption.22}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Distribution of BHT quality scores across NT and OT corpora.}}{8}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:quality_dist}{{7}{8}{Distribution of BHT quality scores across NT and OT corpora}{figure.caption.23}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Cross-Model Comparison}{8}{subsection.5.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Human Evaluation}{8}{subsection.5.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Human evaluation scores (BHT V2 Quality Test).}}{9}{table.caption.24}\protected@file@percent }
+\newlabel{tab:human}{{4}{9}{Human evaluation scores (BHT V2 Quality Test)}{table.caption.24}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{9}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{9}{Discussion}{section.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Strengths.}{9}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Limitations.}{9}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Source adherence vs.\ fluency.}{9}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Prompt engineering insights.}{9}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Project process.}{9}{section*.29}\protected@file@percent }
+\citation{nextjs}
+\@writefile{toc}{\contentsline {section}{\numberline {7}The BibleGo.org Platform}{10}{section.7}\protected@file@percent }
+\newlabel{sec:platform}{{7}{10}{The BibleGo.org Platform}{section.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Commentary reading.}{10}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Word study.}{10}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Full commentary browsing.}{10}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{User experience.}{10}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Data flow.}{10}{section*.39}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces The BibleGo.org desktop reading interface. The three-column layout presents book navigation (left), the NASB Bible text with inline original-language tags (center), and the BHT commentary panel (right) with footnotes linking each sentence to its source commentator.}}{11}{figure.caption.31}\protected@file@percent }
+\newlabel{fig:desktop-bht}{{8}{11}{The BibleGo.org desktop reading interface. The three-column layout presents book navigation (left), the NASB Bible text with inline original-language tags (center), and the BHT commentary panel (right) with footnotes linking each sentence to its source commentator}{figure.caption.31}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces The BibleGo.org mobile experience with the BHT commentary drawer. Footnotes (numbered markers) link each sentence back to its source commentator, allowing users to trace every claim to the original commentary.}}{12}{figure.caption.32}\protected@file@percent }
+\newlabel{fig:bht-mobile}{{9}{12}{The BibleGo.org mobile experience with the BHT commentary drawer. Footnotes (numbered markers) link each sentence back to its source commentator, allowing users to trace every claim to the original commentary}{figure.caption.32}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces The Word Donut visualization for the Hebrew word \textit  {kalah}, showing how it is translated across 219 Old Testament occurrences. Segments represent distinct English renderings (e.g., ``finish'' 74$\times $, ``consume'' 22$\times $), enabling users to explore semantic range without knowledge of the original language.}}{12}{figure.caption.34}\protected@file@percent }
+\newlabel{fig:word-donut}{{10}{12}{The Word Donut visualization for the Hebrew word \textit {kalah}, showing how it is translated across 219 Old Testament occurrences. Segments represent distinct English renderings (e.g., ``finish'' 74$\times $, ``consume'' 22$\times $), enabling users to explore semantic range without knowledge of the original language}{figure.caption.34}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Mobile view of the Word Donut for the Hebrew word \textit  {racham} (``have compassion'') in Isaiah~55. The doughnut chart shows translation frequencies across the Old Testament, enabling word study directly from the reading interface.}}{12}{figure.caption.35}\protected@file@percent }
+\newlabel{fig:wordstudy-mobile}{{11}{12}{Mobile view of the Word Donut for the Hebrew word \textit {racham} (``have compassion'') in Isaiah~55. The doughnut chart shows translation frequencies across the Old Testament, enabling word study directly from the reading interface}{figure.caption.35}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces The full commentary browsing mode, displaying a complete chapter-level commentary from an individual commentator. Users can explore the full original text that informs each BHT.}}{12}{figure.caption.37}\protected@file@percent }
+\newlabel{fig:full-commentary}{{12}{12}{The full commentary browsing mode, displaying a complete chapter-level commentary from an individual commentator. Users can explore the full original text that informs each BHT}{figure.caption.37}{}}
+\bibstyle{plainnat}
+\bibdata{refs}
+\bibcite{cer2018use}{{1}{2018}{{Cer et~al.}}{{Cer, Yang, Kong, Hua, Limtiaco, St.~John, Constant, Guajardo-Cespedes, Yuan, Tar, et~al.}}}
+\bibcite{chase2022langchain}{{2}{2022}{{Chase}}{{}}}
+\bibcite{devlin2019bert}{{3}{2019}{{Devlin et~al.}}{{Devlin, Chang, Lee, and Toutanova}}}
+\bibcite{groq2024llama}{{4}{2024}{{Groq}}{{}}}
+\bibcite{gunning1952fog}{{5}{1952}{{Gunning}}{{}}}
+\bibcite{johnson2019faiss}{{6}{2019}{{Johnson et~al.}}{{Johnson, Douze, and J{\'e}gou}}}
+\bibcite{kincaid1975readability}{{7}{1975}{{Kincaid et~al.}}{{Kincaid, Fishburne, Rogers, and Chissom}}}
+\bibcite{lewis2020rag}{{8}{2020}{{Lewis et~al.}}{{Lewis, Perez, Piktus, Petroni, Karpukhin, Goyal, K{\"u}ttler, Lewis, Yih, Rockt{\"a}schel, et~al.}}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion and Future Work}{13}{section.8}\protected@file@percent }
+\newlabel{sec:conclusion}{{8}{13}{Conclusion and Future Work}{section.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Future work.}{13}{section*.40}\protected@file@percent }
+\bibcite{nllb2022translate}{{9}{2022}{{NLLB Team}}{{}}}
+\bibcite{openai2023gpt35}{{10}{2023}{{OpenAI}}{{}}}
+\bibcite{reimers2019sentencebert}{{11}{2019}{{Reimers and Gurevych}}{{}}}
+\bibcite{song2020mpnet}{{12}{2020}{{Song et~al.}}{{Song, Tan, Qin, Lu, and Liu}}}
+\bibcite{vaswani2017attention}{{13}{2017}{{Vaswani et~al.}}{{Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez, Kaiser, and Polosukhin}}}
+\bibcite{nextjs}{{14}{2023}{{Vercel}}{{}}}
+\gdef \@abspage@last{14}

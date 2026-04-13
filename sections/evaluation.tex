@@ -1,0 +1,143 @@
+% Evaluation section - will be populated with real metrics and chart references
+% after generate-charts produces the figures
+
+We evaluate BibleGoAI across multiple dimensions: aggregate quality metrics, generation strategy comparison, generation attempt analysis, and readability. All metrics are computed from the full corpus of generated BHTs: 7{,}959 New Testament verses and 10{,}492 Old Testament verses (regular variant), with additional comparison across Split-A (12{,}653 verses) and Split-B (12{,}653 verses) variants.
+
+\subsection{Aggregate Quality Metrics}
+
+Table~\ref{tab:aggregate} summarizes the key metrics across the NT and OT corpora. Quality scores reflect the composite tier-weighted commentary accuracy, while quote token proportion measures the fraction of BHT words drawn directly from source commentary.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Aggregate BHT quality metrics across testaments. Values are mean $\pm$ standard deviation.}
+\label{tab:aggregate}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{NT ($n{=}7{,}957$)} & \textbf{OT ($n{=}10{,}492$)} \\
+\midrule
+Quality Score & $1.912 \pm 0.348$ & $1.785 \pm 0.282$ \\
+Word Count & $84.2 \pm 11.1$ & $62.9 \pm 11.6$ \\
+Quote Proportion (\%) & $39.6 \pm 7.4$ & $31.8 \pm 6.3$ \\
+Verse Accuracy & n/a & $0.417 \pm 0.147$ \\
+Commentary Accuracy & $1.912 \pm 0.348$ & $1.785 \pm 0.282$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent The NT corpus achieves higher average quality scores (1.912 vs.\ 1.785), likely reflecting the more extensive commentary coverage for New Testament verses and the maturity of the NT prompt versions. NT BHTs are also longer on average (84 vs.\ 63 words) with higher quote proportions (39.6\% vs.\ 31.8\%), suggesting richer source material for synthesis.
+
+\subsection{Generation Strategy Comparison}
+
+We compare four retrieval and generation strategies applied to OT verses, where the same underlying commentary corpus is processed through different pipelines:
+
+\begin{itemize}[nosep,leftmargin=*]
+    \item \textbf{Regular}: Standard single-pass generation from tagged commentary.
+    \item \textbf{Split-A}: First stage of the two-stage split pipeline (draft synthesis).
+    \item \textbf{Split-B}: Second stage refinement of Split-A output.
+    \item \textbf{RAG variants}: Character-based, recursive, and semantic retrieval.
+\end{itemize}
+
+Figure~\ref{fig:strategy} compares the average quality scores across strategies.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Generation strategy comparison across OT verses.}
+\label{tab:strategy}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Metric} & \textbf{Regular} & \textbf{Split-A} & \textbf{Split-B} \\
+\midrule
+$n$ (verses) & 10{,}492 & 12{,}653 & 12{,}653 \\
+Quality Score & 1.785 & \textbf{1.935} & 1.710 \\
+Verse Accuracy & 0.417 & \textbf{0.467} & 0.353 \\
+Word Count & 62.9 & 55.1 & 30.8 \\
+Quote Prop.\ (\%) & 31.8 & 32.4 & 32.6 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Split-A achieves the highest quality scores (1.935) and verse accuracy (0.467), outperforming both the regular single-pass approach and the Split-B refinement stage. Notably, Split-B produces significantly shorter BHTs (30.8 words on average) with lower scores, suggesting that the refinement step's aggressive compression may sacrifice content quality. The regular strategy offers a balance between length and quality.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{figures/strategy_comparison.pdf}
+\caption{Average quality scores by generation strategy across OT verses.}
+\label{fig:strategy}
+\end{figure}
+
+\subsection{Generation Attempt Analysis}
+
+The system generates up to five candidate BHTs per verse and selects the highest-scoring attempt. Figure~\ref{fig:attempts} shows the average quality score by attempt number, revealing whether iterative generation yields meaningful improvement.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{figures/attempt_trajectory.pdf}
+\caption{Average quality score by generation attempt number (1--5). Later attempts benefit from the system's retry logic but show diminishing returns.}
+\label{fig:attempts}
+\end{figure}
+
+\subsection{Commentator Tier Contribution}
+
+Figure~\ref{fig:tiers} shows the distribution of semantic similarity across the three commentator tiers, illustrating how well the tiering instructions are followed during generation.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{figures/tier_breakdown.pdf}
+\caption{Average commentator tier similarity scores. Tier~1 consistently contributes the most to BHT content, as intended by the prompt design.}
+\label{fig:tiers}
+\end{figure}
+
+\subsection{Quality Score Distribution}
+
+Figure~\ref{fig:quality_dist} presents the distribution of quality scores across all NT and OT verses, showing the overall consistency and range of the system's output.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{figures/quality_distribution.pdf}
+\caption{Distribution of BHT quality scores across NT and OT corpora.}
+\label{fig:quality_dist}
+\end{figure}
+
+\subsection{Cross-Model Comparison}
+
+To assess the impact of the underlying LLM, we compared BHTs generated by three models on a sample of 13 verses: GPT-3.5-turbo \citep{openai2023gpt35}, Llama~3.3-70B (via Groq) \citep{groq2024llama}, and GPT-4o-mini. Table~\ref{tab:crossmodel} summarizes the results.
+
+\noindent Preliminary results on a 13-verse sample suggest that GPT-3.5-turbo and Llama~3.3-70B produce BHTs of comparable quality, with GPT-4o-mini offering a cost-efficient alternative. A full-scale comparison across all verses remains an area for future work.
+
+\subsection{Human Evaluation}
+
+In addition to automated metrics, BHT quality was evaluated through six rounds of structured user testing conducted with members of the project's Bible study community:
+
+\begin{itemize}[nosep,leftmargin=*]
+    \item \textbf{BHT V2 Quality Test}: Human raters scored NT BHTs on a normalized quality scale. Scores ranged from 50.4 to 94.2 out of 100, with a mean of 67.5. The highest-rated BHT (Romans 6:7, score 94.2) demonstrated strong synthesis of commentary insights, while lower-scoring BHTs guided subsequent prompt refinements.
+    \item \textbf{OT BHT V1 Quality Test}: A separate round evaluated the first generation of OT BHTs, providing feedback that informed the comparison of RAG versus tagging strategies.
+\end{itemize}
+
+\noindent Table~\ref{tab:human} presents the human quality scores from the BHT V2 evaluation.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Human evaluation scores (BHT V2 Quality Test).}
+\label{tab:human}
+\begin{tabular}{@{}lc@{}}
+\toprule
+\textbf{Verse} & \textbf{Quality Score} \\
+\midrule
+Romans 6:7 & 94.2 \\
+John 5:22 & 80.1 \\
+Ephesians 1:22 & 77.3 \\
+Ephesians 6:13 & 65.5 \\
+Galatians 5:22 & 62.7 \\
+John 10:27 & 57.0 \\
+Romans 6:21 & 54.1 \\
+Revelation 3:3 & 50.4 \\
+\midrule
+\textbf{Mean} & \textbf{67.7} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent These human scores, combined with the automated quality metrics, provided a feedback loop that drove iterative prompt refinement---most notably the May 2024 prompt updates that shifted the choicest extraction focus from ``striking and enlightening'' to ``helpful, explanatory, and illuminating'' quotes targeting basic words and facts in each verse.

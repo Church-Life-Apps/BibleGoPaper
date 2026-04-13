@@ -1,0 +1,160 @@
+BibleGoAI is composed of three major subsystems: (1) a data layer housing the biblical text and commentary corpus, (2) an AI pipeline that generates, scores, and validates BHTs, and (3) a web application that serves the results to end users. Figure~\ref{fig:architecture} provides an overview of the end-to-end architecture.
+
+% --- ARCHITECTURE DIAGRAM ---
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+    node distance=1.0cm and 0.8cm,
+    block/.style={rectangle, draw=pipeline!40, fill=pipeline!8, text width=2.2cm, minimum height=1.0cm, align=center, font=\small\sffamily, rounded corners=2pt, line width=0.4pt},
+    data/.style={rectangle, draw=tier1!40, fill=tier1!8, text width=2.2cm, minimum height=1.0cm, align=center, font=\small\sffamily, rounded corners=2pt, line width=0.4pt},
+    output/.style={rectangle, draw=accent!40, fill=accent!8, text width=2.2cm, minimum height=1.0cm, align=center, font=\small\sffamily, rounded corners=2pt, line width=0.4pt},
+    arrow/.style={-{Stealth[length=2.5mm]}, line width=0.7pt, color=pipeline!70},
+    techlabel/.style={font=\scriptsize\sffamily\itshape, color=pipeline!70}
+]
+% Data sources
+\node[data] (bible) {NASB Bible\\(66 books)};
+\node[data, right=of bible] (comm) {Commentary\\Corpus (20+)};
+
+% Pipeline - more vertical space from data
+\node[block, below right=1.4cm and -0.7cm of bible] (extract) {Quote\\Extraction};
+\node[block, right=of extract] (retrieve) {Retrieval\\(FAISS)};
+\node[block, right=of retrieve] (generate) {BHT\\Generation};
+\node[block, right=of generate] (score) {Scoring \&\\Validation};
+\node[block, right=of score] (footnote) {Footnoting\\+ Tagging};
+
+% Output - more vertical space from pipeline
+\node[output, below=1.4cm of generate] (db) {PostgreSQL\\Database};
+\node[output, right=1.5cm of db] (webapp) {BibleGo.org\\(Next.js)};
+\node[output, right=1.5cm of webapp] (users) {Hundreds of\\Monthly Users};
+
+% Arrows - data to pipeline
+\draw[arrow] (bible.south) -- ++(0,-0.5) -| (extract.north);
+\draw[arrow] (comm.south) -- ++(0,-0.5) -| (extract.north);
+\draw[arrow] (comm.south) -- ++(0,-0.5) -| (retrieve.north);
+
+% Arrows - pipeline flow
+\draw[arrow] (extract) -- (retrieve);
+\draw[arrow] (retrieve) -- (generate);
+\draw[arrow] (generate) -- (score);
+\draw[arrow] (score) -- (footnote);
+
+% Tech labels - first two below, last three above, with more spacing
+\node[techlabel, below=0.35cm of extract] {GPT-3.5};
+\node[techlabel, below=0.35cm of retrieve] {HuggingFace};
+\node[techlabel, above=0.35cm of generate] {GPT-3.5};
+\node[techlabel, above=0.35cm of score] {USE + textstat};
+\node[techlabel, above=0.35cm of footnote] {Cross-encoder};
+
+% Arrows - to deployment
+\draw[arrow] (footnote.south) -- ++(0,-0.5) -| (db.north);
+\draw[arrow] (db) -- (webapp);
+\draw[arrow] (webapp) -- (users);
+
+% Background groups - truly behind everything
+\begin{scope}[on background layer]
+    \node[fit=(bible)(comm), fill=tier1!5, draw=none, rounded corners=4pt, inner sep=8pt] {};
+    \node[fit=(extract)(retrieve)(generate)(score)(footnote), fill=pipeline!5, draw=none, rounded corners=4pt, inner sep=8pt] {};
+    \node[fit=(db)(webapp)(users), fill=accent!5, draw=none, rounded corners=4pt, inner sep=8pt] {};
+\end{scope}
+
+% Group labels - drawn on foreground with more spacing
+\node[font=\footnotesize\sffamily\bfseries, tier1, above=0.5cm of bible.north east] {Data Sources};
+\node[font=\footnotesize\sffamily\bfseries, pipeline, above=0.8cm of generate] {BibleGoAI Pipeline};
+\node[font=\footnotesize\sffamily\bfseries, accent, below=0.8cm of webapp.south west, anchor=west] {Deployment};
+\end{tikzpicture}
+\caption{End-to-end system architecture. Commentary and Bible text flow through the five-phase AI pipeline, producing scored BHTs with footnotes that are stored in PostgreSQL and served via the BibleGo.org web application.}
+\label{fig:architecture}
+\end{figure*}
+
+\subsection{Data Sources}
+
+The system operates on two primary data sources:
+
+\paragraph{Biblical text.} The New American Standard Bible (NASB, 1995 edition) provides the target verse text for all 66 books of the Bible. Each verse is stored as a JSON record with chapter, verse number, and text content. The NASB was selected for its reputation as a highly literal translation, which aligns well with the commentary corpus.
+
+\paragraph{Commentary corpus.} The commentary collection comprises over 20 curated sources spanning the 16th through 20th centuries. For the New Testament, nine primary commentators form \textbf{Tier~1}: Henry Alford, Jamieson-Fausset-Brown, Albert Barnes, Marvin Vincent, John Calvin, Philip Schaff, Archibald T. Robertson, John Gill, and John Wesley. Additional commentators are assigned to Tier~2 and Tier~3 based on their breadth and scholarly standing. For the Old Testament, the corpus includes Keil \& Delitzsch, Albert Barnes, Adam Clarke, and specialty commentators such as Arthur W. Pink and Charles H. Mackintosh.
+
+All commentaries were curated and vetted by a group of Christians from the Cleveland, Ohio area, ensuring theological reliability and scholarly quality.
+
+\subsection{Commentator Tiering}
+
+The tiering system serves a critical role in the generation process. When synthesizing a BHT, the LLM is instructed to draw \textit{primarily} from Tier~1 commentators, \textit{sparingly} from Tier~2, and \textit{minimally} from Tier~3. This weighted approach ensures that the most trusted and comprehensive commentators dominate the output while allowing supplementary perspectives to enrich the synthesis. Table~\ref{tab:commentators} lists the Tier~1 commentators and their approximate date ranges.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Tier~1 New Testament commentators.}
+\label{tab:commentators}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Commentator} & \textbf{Era} \\
+\midrule
+Henry Alford & 1810--1871 \\
+Jamieson, Fausset \& Brown & 1871 \\
+Albert Barnes & 1798--1870 \\
+Marvin R. Vincent & 1834--1922 \\
+John Calvin & 1509--1564 \\
+Philip Schaff & 1819--1893 \\
+Archibald T. Robertson & 1863--1934 \\
+John Gill & 1697--1771 \\
+John Wesley & 1703--1791 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Prompt Engineering}
+
+The system relies on three families of prompts, each iteratively refined through multiple versions:
+
+\begin{itemize}[nosep,leftmargin=*]
+    \item \textbf{Choicest prompts} (v0.1--v2.2): instruct the LLM to extract 1--3 verbatim quotes from a commentator's text, selecting the most ``striking, unique, and enlightening'' passages.
+    \item \textbf{BHT prompts} (v0.1--v0.8): instruct the LLM to synthesize a constrained paragraph from tiered quotes, enforcing word count, quote proportion, and stylistic rules.
+    \item \textbf{Tag commentary prompts} (v0.1--v0.7): instruct the LLM to segment multi-verse commentary into individual verse-level sections.
+\end{itemize}
+
+Prompt versioning enables systematic comparison of prompt effectiveness across generation runs, a form of ablation study applied to prompt design.
+
+\subsection{Commentary Digitization}
+
+Not all commentaries in the corpus were available in digital form. Two major digitization efforts were undertaken by volunteers to expand the commentary corpus:
+
+\paragraph{Alford's New Testament for English Readers.} Henry Alford's four-volume commentary (1868--1872) was digitized from physical book scans totaling 2{,}544 pages across all 27 New Testament books. The pipeline consisted of three stages: (1)~\textit{extraction} via Tesseract OCR and Google Cloud Vision, converting scanned pages to text; (2)~\textit{human correction}, in which 28 volunteers spent hundreds of hours reviewing and correcting OCR errors through a coordinated Google Drive spreadsheet; and (3)~\textit{automated consolidation}, which detected chapter boundaries, parsed verse-level commentary, performed spell-checking, and produced structured output files. This effort represents a significant scholarly contribution independent of the AI pipeline.
+
+% --- DIGITIZATION PIPELINE DIAGRAM ---
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    digbox/.style={rectangle, draw=tier1!40, fill=tier1!8, text width=2.8cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
+    digarrow/.style={-{Stealth[length=2mm]}, line width=0.5pt, color=tier1!60},
+]
+\node[digbox] (scan) {Book Scans\\(2{,}544 pages)};
+\node[digbox, right=of scan] (ocr) {Tesseract OCR +\\Google Cloud Vision};
+\node[digbox, right=of ocr] (human) {28 Volunteers\\(Google Drive)};
+\node[digbox, right=of human] (consol) {Automated\\Consolidation};
+
+\draw[digarrow] (scan) -- (ocr);
+\draw[digarrow] (ocr) -- (human);
+\draw[digarrow] (human) -- (consol);
+
+\node[font=\tiny\sffamily\itshape, color=tier1!60, below=0.15cm of scan] {PDF/images};
+\node[font=\tiny\sffamily\itshape, color=tier1!60, below=0.15cm of ocr] {Raw DOCX};
+\node[font=\tiny\sffamily\itshape, color=tier1!60, below=0.15cm of human] {Corrected text};
+\node[font=\tiny\sffamily\itshape, color=tier1!60, below=0.15cm of consol] {Structured JSON};
+\end{tikzpicture}
+\caption{Commentary digitization pipeline used for Alford's and Govett's commentaries.}
+\label{fig:digitization}
+\end{figure*}
+
+\paragraph{Govett's Commentary on Revelation.} Robert Govett's commentary on Revelation was digitized through the same volunteer-driven process, spanning 627 pages and producing 274 individual verse commentary files covering all 22 chapters. Both digitization projects followed the same three-stage pipeline, demonstrating its replicability for future commentary digitization.
+
+\subsection{Original Language Tagging}
+
+A separate pipeline was developed to tag every word in the Bible with its corresponding Hebrew or Greek Strong's concordance number. The raw NASB text, with original-language tags provided courtesy of the NASB, was processed through a dedicated parser that produced two outputs:
+
+\begin{itemize}[nosep,leftmargin=*]
+    \item \textbf{Bible tagged files}: 66 JSON files (one per book), where each English word is linked to its Strong's code (e.g., ``beginning'' $\rightarrow$ H7225).
+    \item \textbf{Tagged occurrence index}: 14{,}141 individual Strong's code files containing all 321{,}621 verse occurrences across the Bible, enabling reverse lookup from any Hebrew or Greek word to every verse where it appears.
+\end{itemize}
+
+\noindent A dictionary of 9{,}333 Hebrew and 5{,}564 Greek entries was also compiled, providing original-language forms, transliterations, and definitions. This tagging infrastructure powers the Word Donut feature on BibleGo.org (Section~\ref{sec:platform}) and also enabled the TAG retrieval strategy for OT BHT generation (Section~\ref{sec:methods}).
