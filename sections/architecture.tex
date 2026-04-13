@@ -4,7 +4,7 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-    node distance=0.7cm and 0.8cm,
+    node distance=1.1cm and 0.8cm,
     block/.style={rectangle, draw=pipeline!40, fill=pipeline!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
     data/.style={rectangle, draw=tier1!40, fill=tier1!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
     output/.style={rectangle, draw=accent!40, fill=accent!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
@@ -41,12 +41,12 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 \draw[arrow] (generate) -- (score);
 \draw[arrow] (score.south) -- ++(0,-0.2) -| (footnote.north east);
 
-% Tech labels - placed below each box to avoid overlap
-\node[techlabel, below=0.08cm of extract] {GPT-3.5};
-\node[techlabel, below=0.08cm of retrieve] {HuggingFace};
-\node[techlabel, below=0.08cm of generate] {GPT-3.5};
-\node[techlabel, below=0.08cm of score] {USE + textstat};
-\node[techlabel, below=0.08cm of footnote] {Cross-encoder};
+% Tech labels - placed below each box with enough clearance
+\node[techlabel, below=0.12cm of extract] {GPT-3.5};
+\node[techlabel, below=0.12cm of retrieve] {HuggingFace};
+\node[techlabel, below=0.12cm of generate] {GPT-3.5};
+\node[techlabel, below=0.12cm of score] {USE + textstat};
+\node[techlabel, below=0.12cm of footnote] {Cross-encoder};
 
 % Arrows - to deployment
 \draw[arrow] (footnote.south) -- ++(0,-0.55) -- (db.north);
