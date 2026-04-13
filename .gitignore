@@ -1,0 +1,19 @@
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+
+# Keep paper.pdf (tracked intentionally)
+!paper.pdf
+
+# Large original PNGs (JPGs used in paper)
+# figures/biblego-bht-mobile.png
+# figures/biblego-wordstudy-mobile.png
