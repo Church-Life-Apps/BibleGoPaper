@@ -10,7 +10,7 @@ The main reading interface presents a responsive three-column layout (Figure~\re
   \label{fig:desktop-bht}
 \end{figure*}
 
-\begin{figure}[!htbp]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.65\columnwidth]{figures/biblego-bht-mobile.jpg}
   \caption{The BibleGo.org mobile experience with the BHT commentary drawer. Footnotes (numbered markers) link each sentence back to its source commentator, allowing users to trace every claim to the original commentary.}
@@ -20,14 +20,14 @@ The main reading interface presents a responsive three-column layout (Figure~\re
 \paragraph{Word study.}
 BibleGo.org includes an interactive word study feature---the \textit{Word Donut}---powered by Strong's concordance data built from the original language tagging pipeline (Section~\ref{sec:architecture}). Users can select any word in the Bible text to view its original Greek or Hebrew form, transliteration, and definition. An interactive doughnut chart then visualizes how the NASB translators chose to render that word across all its occurrences in the Bible, showing each English translation variant and its frequency (Figure~\ref{fig:word-donut}). This feature supports pagination and filtering by translation variant, enabling deep original-language exploration without requiring knowledge of Greek or Hebrew. As the application notes, drawing from Edward W. Goodrick: while the various English renderings can enrich understanding, ``we are enslaved to the tyranny of the context''---each usage must be understood within its own passage.
 
-\begin{figure}[!htbp]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.75\columnwidth]{figures/word-donut.png}
   \caption{The Word Donut visualization for the Hebrew word \textit{kalah}, showing how it is translated across 219 Old Testament occurrences. Segments represent distinct English renderings (e.g., ``finish'' 74$\times$, ``consume'' 22$\times$), enabling users to explore semantic range without knowledge of the original language.}
   \label{fig:word-donut}
 \end{figure}
 
-\begin{figure}[!htbp]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=0.65\columnwidth]{figures/biblego-wordstudy-mobile.jpg}
   \caption{Mobile view of the Word Donut for the Hebrew word \textit{racham} (``have compassion'') in Isaiah~55. The doughnut chart shows translation frequencies across the Old Testament, enabling word study directly from the reading interface.}
@@ -37,7 +37,7 @@ BibleGo.org includes an interactive word study feature---the \textit{Word Donut}
 \paragraph{Full commentary browsing.}
 Users can switch from the BHT summary view to a full commentary mode, which displays the complete chapter-level commentary for any individual commentator (Figure~\ref{fig:full-commentary}). This enables readers who encounter an interesting insight in a BHT to dive deeper into the full context of that commentator's work.
 
-\begin{figure}[!htbp]
+\begin{figure}[tbp]
   \centering
   \includegraphics[width=\columnwidth]{figures/biblego-full-commentary.png}
   \caption{The full commentary browsing mode, displaying a complete chapter-level commentary from an individual commentator. Users can explore the full original text that informs each BHT.}

@@ -59,9 +59,9 @@ Quote Prop.\ (\%) & 31.8 & 32.4 & 32.6 \\
 
 \noindent Split-A achieves the highest quality scores (1.935) and verse accuracy (0.467), outperforming both the regular single-pass approach and the Split-B refinement stage. Notably, Split-B produces significantly shorter BHTs (30.8 words on average) with lower scores, suggesting that the refinement step's aggressive compression may sacrifice content quality. The regular strategy offers a balance between length and quality.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{figures/strategy_comparison.pdf}
+\includegraphics[width=0.95\columnwidth]{figures/strategy_comparison.pdf}
 \caption{Average quality scores by generation strategy across OT verses.}
 \label{fig:strategy}
 \end{figure}
@@ -70,9 +70,9 @@ Quote Prop.\ (\%) & 31.8 & 32.4 & 32.6 \\
 
 The system generates up to five candidate BHTs per verse and selects the highest-scoring attempt. Figure~\ref{fig:attempts} shows the average quality score by attempt number, revealing whether iterative generation yields meaningful improvement.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{figures/attempt_trajectory.pdf}
+\includegraphics[width=0.95\columnwidth]{figures/attempt_trajectory.pdf}
 \caption{Average quality score by generation attempt number (1--5). Later attempts benefit from the system's retry logic but show diminishing returns.}
 \label{fig:attempts}
 \end{figure}
@@ -81,9 +81,9 @@ The system generates up to five candidate BHTs per verse and selects the highest
 
 Figure~\ref{fig:tiers} shows the distribution of semantic similarity across the three commentator tiers, illustrating how well the tiering instructions are followed during generation.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{figures/tier_breakdown.pdf}
+\includegraphics[width=0.95\columnwidth]{figures/tier_breakdown.pdf}
 \caption{Average commentator tier similarity scores. Tier~1 consistently contributes the most to BHT content, as intended by the prompt design.}
 \label{fig:tiers}
 \end{figure}
@@ -92,9 +92,9 @@ Figure~\ref{fig:tiers} shows the distribution of semantic similarity across the 
 
 Figure~\ref{fig:quality_dist} presents the distribution of quality scores across all NT and OT verses, showing the overall consistency and range of the system's output.
 
-\begin{figure}[htbp]
+\begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{figures/quality_distribution.pdf}
+\includegraphics[width=0.95\columnwidth]{figures/quality_distribution.pdf}
 \caption{Distribution of BHT quality scores across NT and OT corpora.}
 \label{fig:quality_dist}
 \end{figure}
