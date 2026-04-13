@@ -121,30 +121,30 @@ Not all commentaries in the corpus were available in digital form. Two major dig
 \paragraph{Alford's New Testament for English Readers.} Henry Alford's four-volume commentary (1868--1872) was digitized from physical book scans totaling 2{,}544 pages across all 27 New Testament books. The pipeline consisted of three stages: (1)~\textit{extraction} via Tesseract OCR and Google Cloud Vision, converting scanned pages to text; (2)~\textit{human correction}, in which 28 volunteers spent hundreds of hours reviewing and correcting OCR errors through a coordinated Google Drive spreadsheet; and (3)~\textit{automated consolidation}, which detected chapter boundaries, parsed verse-level commentary, performed spell-checking, and produced structured output files. This effort represents a significant scholarly contribution independent of the AI pipeline.
 
 % --- DIGITIZATION PIPELINE DIAGRAM ---
-\begin{figure*}[t]
+\begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-    node distance=1.2cm,
+    node distance=0.6cm,
     digbox/.style={rectangle, draw=tier1!40, fill=tier1!8, text width=2.8cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
     digarrow/.style={-{Stealth[length=2mm]}, line width=0.5pt, color=tier1!60},
 ]
 \node[digbox] (scan) {Book Scans\\(2{,}544 pages)};
-\node[digbox, right=of scan] (ocr) {Tesseract OCR +\\Google Cloud Vision};
-\node[digbox, right=of ocr] (human) {28 Volunteers\\(Google Drive)};
-\node[digbox, right=of human] (consol) {Automated\\Consolidation};
+\node[digbox, below=of scan] (ocr) {Tesseract OCR +\\Google Cloud Vision};
+\node[digbox, below=of ocr] (human) {28 Volunteers\\(Google Drive)};
+\node[digbox, below=of human] (consol) {Automated\\Consolidation};
 
 \draw[digarrow] (scan) -- (ocr);
 \draw[digarrow] (ocr) -- (human);
 \draw[digarrow] (human) -- (consol);
 
-\node[font=\tiny\sffamily\itshape, color=tier1!60, below=0.15cm of scan] {PDF/images};
-\node[font=\tiny\sffamily\itshape, color=tier1!60, below=0.15cm of ocr] {Raw DOCX};
-\node[font=\tiny\sffamily\itshape, color=tier1!60, below=0.15cm of human] {Corrected text};
-\node[font=\tiny\sffamily\itshape, color=tier1!60, below=0.15cm of consol] {Structured JSON};
+\node[font=\tiny\sffamily\itshape, color=tier1!60, right=0.15cm of scan] {PDF/images};
+\node[font=\tiny\sffamily\itshape, color=tier1!60, right=0.15cm of ocr] {Raw DOCX};
+\node[font=\tiny\sffamily\itshape, color=tier1!60, right=0.15cm of human] {Corrected text};
+\node[font=\tiny\sffamily\itshape, color=tier1!60, right=0.15cm of consol] {Structured JSON};
 \end{tikzpicture}
 \caption{Commentary digitization pipeline used for Alford's and Govett's commentaries.}
 \label{fig:digitization}
-\end{figure*}
+\end{figure}
 
 \paragraph{Govett's Commentary on Revelation.} Robert Govett's commentary on Revelation was digitized through the same volunteer-driven process, spanning 627 pages and producing 274 individual verse commentary files covering all 22 chapters. Both digitization projects followed the same three-stage pipeline, demonstrating its replicability for future commentary digitization.
 
