@@ -4,10 +4,10 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-    node distance=0.7cm and 0.6cm,
-    block/.style={rectangle, draw=pipeline!40, fill=pipeline!8, text width=1.8cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
-    data/.style={rectangle, draw=tier1!40, fill=tier1!8, text width=1.8cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
-    output/.style={rectangle, draw=accent!40, fill=accent!8, text width=1.8cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
+    node distance=0.7cm and 0.8cm,
+    block/.style={rectangle, draw=pipeline!40, fill=pipeline!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
+    data/.style={rectangle, draw=tier1!40, fill=tier1!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
+    output/.style={rectangle, draw=accent!40, fill=accent!8, text width=1.6cm, minimum height=0.8cm, align=center, font=\scriptsize\sffamily, rounded corners=2pt, line width=0.4pt},
     arrow/.style={-{Stealth[length=2mm]}, line width=0.6pt, color=pipeline!70},
     techlabel/.style={font=\tiny\sffamily\itshape, color=pipeline!70}
 ]
@@ -41,21 +41,21 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 \draw[arrow] (generate) -- (score);
 \draw[arrow] (score.south) -- ++(0,-0.2) -| (footnote.north east);
 
-% Tech labels
-\node[techlabel, right=0.15cm of extract.east, anchor=west, xshift=1.8cm] {GPT-3.5};
-\node[techlabel, right=0.15cm of retrieve.east, anchor=west] {HuggingFace};
-\node[techlabel, right=0.15cm of generate.east, anchor=west, xshift=1.8cm] {GPT-3.5};
-\node[techlabel, right=0.15cm of score.east, anchor=west] {USE + textstat};
-\node[techlabel, right=0.15cm of footnote.east, anchor=west] {Cross-encoder};
+% Tech labels - placed below each box to avoid overlap
+\node[techlabel, below=0.08cm of extract] {GPT-3.5};
+\node[techlabel, below=0.08cm of retrieve] {HuggingFace};
+\node[techlabel, below=0.08cm of generate] {GPT-3.5};
+\node[techlabel, below=0.08cm of score] {USE + textstat};
+\node[techlabel, below=0.08cm of footnote] {Cross-encoder};
 
 % Arrows - to deployment
-\draw[arrow] (footnote.south) -- (db.north);
+\draw[arrow] (footnote.south) -- ++(0,-0.55) -- (db.north);
 \draw[arrow] (db) -- (webapp);
 
 % Background groups
 \begin{scope}[on background layer]
     \node[fit=(bible)(comm), fill=tier1!5, draw=none, rounded corners=4pt, inner sep=6pt] {};
-    \node[fit=(extract)(retrieve)(generate)(score)(footnote), fill=pipeline!5, draw=none, rounded corners=4pt, inner sep=6pt] {};
+    \node[fit=(extract)(retrieve)(generate)(score)(footnote), fill=pipeline!5, draw=none, rounded corners=4pt, inner sep=10pt, inner ysep=14pt] {};
     \node[fit=(db)(webapp), fill=accent!5, draw=none, rounded corners=4pt, inner sep=6pt] {};
 \end{scope}
 
