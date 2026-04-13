@@ -70,23 +70,27 @@ Quote Prop.\ (\%) & 31.8 & 32.4 & 32.6 \\
 
 The system generates up to five candidate BHTs per verse and selects the highest-scoring attempt. Figure~\ref{fig:attempts} shows the average quality score by attempt number, revealing whether iterative generation yields meaningful improvement.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.95\columnwidth]{figures/attempt_trajectory.pdf}
-\caption{Average quality score by generation attempt number (1--5). Later attempts benefit from the system's retry logic but show diminishing returns.}
-\label{fig:attempts}
-\end{figure}
-
 \subsection{Commentator Tier Contribution}
 
 Figure~\ref{fig:tiers} shows the distribution of semantic similarity across the three commentator tiers, illustrating how well the tiering instructions are followed during generation.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=0.95\columnwidth]{figures/tier_breakdown.pdf}
-\caption{Average commentator tier similarity scores. Tier~1 consistently contributes the most to BHT content, as intended by the prompt design.}
-\label{fig:tiers}
-\end{figure}
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/attempt_trajectory.pdf}
+    \caption{Average quality score by generation attempt number (1--5). Later attempts show diminishing returns.}
+    \label{fig:attempts}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/tier_breakdown.pdf}
+    \caption{Average commentator tier similarity scores. Tier~1 consistently contributes the most to BHT content.}
+    \label{fig:tiers}
+\end{subfigure}
+\caption{Generation attempt analysis and commentator tier contribution across NT and OT corpora.}
+\end{figure*}
 
 \subsection{Quality Score Distribution}
 
