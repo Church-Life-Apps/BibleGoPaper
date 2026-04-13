@@ -14,7 +14,7 @@ This paper is a technical record of the BibleGoAI project — how it works, how 
 
 ## Authors
 
-Eric Hao, Brandon Xia, Esther Faulk, Rex Beck — [BibleGo Ministry](https://www.biblego.org/)
+Eric Hao, Brandon Xia, Esther Faulk, Rex Beck — [BibleGo.org](https://www.biblego.org/)
 
 ## Building the Paper
 
@@ -77,4 +77,4 @@ Note: This reads BHT JSON data from `../bht/` which is not included in this repo
 
 ## License
 
-This paper and its contents are © BibleGo Ministry. All rights reserved.
+This paper and its contents are © the authors. All rights reserved.
