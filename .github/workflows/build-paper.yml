@@ -1,0 +1,70 @@
+name: Build Paper PDF
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.tex'
+      - '**.bib'
+      - 'figures/**'
+      - 'generate_charts.py'
+      - '.github/workflows/build-paper.yml'
+  pull_request:
+    paths:
+      - '**.tex'
+      - '**.bib'
+      - 'figures/**'
+      - 'generate_charts.py'
+      - '.github/workflows/build-paper.yml'
+
+# Allow the workflow to commit back to the branch
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Skip if the triggering commit was made by the auto-build bot itself (prevents loops)
+    if: github.event.head_commit.message == null || !contains(github.event.head_commit.message, '[skip ci]')
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # For PRs from the same repo, check out the PR branch so we can push commits back
+          ref: ${{ github.head_ref || github.ref_name }}
+          # Fetch full history so we can push
+          fetch-depth: 0
+
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: paper.tex
+          latexmk_use_xelatex: false
+          # latexmk handles pdflatex + bibtex + rerun logic automatically
+          args: -pdf -interaction=nonstopmode -file-line-error
+
+      - name: Upload PDF as workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-pdf
+          path: paper.pdf
+          retention-days: 30
+
+      - name: Commit updated paper.pdf
+        # Only commit on pushes and same-repo PRs (fork PRs can't push back)
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet paper.pdf; then
+            echo "paper.pdf is unchanged; nothing to commit."
+            exit 0
+          fi
+
+          git add paper.pdf
+          git commit -m "Auto-build paper.pdf [skip ci]"
+          git push
