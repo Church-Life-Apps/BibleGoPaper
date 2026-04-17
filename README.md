@@ -14,7 +14,7 @@ This paper is a technical record of the BibleGoAI project — how it works, how 
 
 ## Authors
 
-Eric Hao, Brandon Xia, Esther Faulk, Rex Beck — [BibleGo.org](https://www.biblego.org/)
+Eric Hao, Brandon Xia, Esther Faulk, Sam Faulk, Mark Miller, James Reinarz, David Kuo, Sarah Kuo, Sam Kuo, Philip Tsao, Samuel Huoh, Regina Graphenreed, Keith Dolcy, Rex Beck — [BibleGo.org](https://www.biblego.org/)
 
 ## Building the Paper
 
