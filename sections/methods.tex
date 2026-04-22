@@ -55,21 +55,21 @@ As an alternative or supplement to direct quote extraction, the system supports 
 
 \noindent Chunks are embedded using HuggingFace's \texttt{all-mpnet-base-v2} sentence transformer \citep{song2020mpnet} and indexed with FAISS \citep{johnson2019faiss}. At query time, the target Bible verse is embedded and the top-$k$ most semantically similar commentary passages are retrieved, ranked by cosine similarity.
 
-This retrieval mechanism enables coverage of commentaries that span multiple verses, where a single verse may not have a dedicated entry. Four retrieval variants were evaluated: simple character-based RAG, recursive RAG (R-RAG), semantic RAG (S-RAG), and a tagging-based approach (TAG) that uses LLM-driven verse segmentation.
+This retrieval mechanism enables coverage of commentaries that span multiple verses, where a single verse may not have a dedicated entry. During OT development, several chunking and retrieval variants were explored---character-based, recursive, semantic, and a tagging-based approach using LLM-driven verse segmentation---to inform the deployed configuration described below.
 
 \subsection{Phase 3: BHT Generation}
 
 The core synthesis step produces a BHT from the extracted or retrieved quotes. Commentators are organized into three tiers (Section~\ref{sec:architecture}), and the selected quotes are submitted to GPT-3.5-turbo with a \textit{BHT prompt} specifying the following constraints:
 
 \begin{itemize}[nosep,leftmargin=*]
-    \item The output must be a single coherent paragraph of 30--70 words in 1--3 sentences.
-    \item At least 50\% of the words must originate from the provided quotes.
+    \item The output must be a single coherent paragraph of 30--80 words in 1--3 sentences.
+    \item Between 30\% and 90\% of the words must originate from the provided quotes, with a target of roughly 70\%.
     \item The paragraph should draw primarily from Tier~1, sparingly from Tier~2, and minimally from Tier~3.
     \item No references to commentators by name, verse numbers, or the word ``passage.''
     \item The text must not take the form of a list.
 \end{itemize}
 
-\noindent These constraints are expressed in natural language in the prompt itself; the \emph{hard} acceptance gate enforced at validation time (Section~\ref{sec:scoring}) uses a wider 30--90\% range for quote-word proportion, so candidates that meet the spirit of the 50\% target but fall slightly short are not immediately discarded. The system makes up to five generation attempts per verse, scoring each candidate and retaining the highest-quality result.
+\noindent These same constraints are enforced at validation time as the hard acceptance gate (Section~\ref{sec:scoring}). The system makes up to five generation attempts per verse, scoring each candidate and retaining the highest-quality result.
 
 \subsection{Phase 4: Split-BHT Variant}
 
@@ -103,7 +103,7 @@ Every generated BHT undergoes a multi-dimensional quality assessment combining h
     \item \textbf{Tier distribution}: The proportion of BHT content attributable to each commentator tier, measured via per-tier semantic similarity.
 \end{itemize}
 
-\noindent Among the up to five generation attempts, the BHT with the highest composite quality score is selected. The scoring function prioritizes commentary accuracy while penalizing outputs that violate hard constraints.
+\noindent Among the up to five generation attempts, the BHT with the highest composite commentary-accuracy score is selected. The scoring function prioritizes commentary accuracy while penalizing outputs that violate hard constraints.
 
 \subsection{Phase 6: Footnoting and Tagging}
 
