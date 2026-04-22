@@ -55,7 +55,7 @@ As an alternative or supplement to direct quote extraction, the system supports 
 
 \noindent Chunks are embedded using HuggingFace's \texttt{all-mpnet-base-v2} sentence transformer \citep{song2020mpnet} and indexed with FAISS \citep{johnson2019faiss}. At query time, the target Bible verse is embedded and the top-$k$ most semantically similar commentary passages are retrieved, ranked by cosine similarity.
 
-This retrieval mechanism enables coverage of commentaries that span multiple verses, where a single verse may not have a dedicated entry. During OT development, several chunking and retrieval variants were explored---character-based, recursive, semantic, and a tagging-based approach using LLM-driven verse segmentation---to inform the deployed configuration described below.
+This retrieval mechanism enables coverage of commentaries that span multiple verses, where a single verse may not have a dedicated entry. During OT development, several chunking and retrieval variants were explored---character-based, recursive, semantic, and a tagging-based approach using LLM-driven verse segmentation---to inform the production configuration described below.
 
 \subsection{Phase 3: BHT Generation}
 
