@@ -1,7 +1,7 @@
 % Evaluation section - will be populated with real metrics and chart references
 % after generate-charts produces the figures
 
-We evaluate BibleGoAI across multiple dimensions: aggregate quality metrics, generation strategy comparison, generation attempt analysis, and readability. All metrics are computed from the full corpus of generated BHTs: 7{,}957 New Testament verses and 10{,}492 Old Testament verses (regular variant), with additional comparison across Split-A (12{,}653 verses) and Split-B (12{,}653 verses) variants.
+We evaluate BibleGoAI across multiple dimensions: aggregate quality metrics, generation strategy comparison, generation attempt analysis, and readability. All metrics are computed from the full corpus of generated BHTs: 7{,}957 New Testament verses and the full 39-book Old Testament, which is served via two complementary pipelines---a single-pass \emph{regular} pipeline (24 books, 10{,}492 verses) and a two-stage \emph{split} pipeline (20 books, 12{,}653 verses) whose two stages (\emph{split-a} and \emph{split-b}) are concatenated into a single served BHT per verse. The two pipelines overlap on 5 books (1~Kings, Esther, Habakkuk, Hosea, Micah), enabling a head-to-head comparison on shared texts in addition to corpus-wide aggregates.
 
 \subsection{Aggregate Quality Metrics}
 
@@ -25,6 +25,8 @@ Verse Accuracy & --- & $0.417 \pm 0.147$ \\
 \end{table}
 
 \noindent The NT corpus achieves higher average quality scores (1.912 vs.\ 1.785), likely reflecting the more extensive commentary coverage for New Testament verses and the maturity of the NT prompt versions. NT BHTs are also longer on average (84 vs.\ 63 words) with higher quote proportions (39.6\% vs.\ 31.8\%), suggesting richer source material for synthesis. Verse accuracy was computed only for the OT corpus; see below for discussion.
+
+\paragraph{A note on NT word count.} The observed NT mean (84.2 words) sits just above the soft word-limit upper bound (80). The generation loop runs up to five attempts per verse and, if no candidate satisfies the full set of soft constraints (30--80 words, quote-proportion, etc.), the highest-scoring attempt is retained regardless of which constraints it misses. This best-of-five fallback prioritizes commentary quality over strict length compliance, yielding a mean that slightly overshoots the soft cap; see Section~\ref{sec:methods} for the full constraint-enforcement protocol.
 
 \paragraph{Verse accuracy (OT only).}
 \label{sec:verse-acc}
