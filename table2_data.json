@@ -1,0 +1,53 @@
+{
+  "regular": {
+    "corpus_wide": {
+      "n_verses": 10492,
+      "n_books": 24,
+      "mean_score": 1.7853886835460702,
+      "mean_word_count": 61.38610369805566,
+      "mean_proportion": 31.803008959207013
+    },
+    "overlap_only": {
+      "n_verses": 217,
+      "n_books": 5,
+      "mean_score": 1.9384250502746658,
+      "mean_word_count": 61.17972350230415,
+      "mean_proportion": 31.862396313364055
+    }
+  },
+  "split_combined": {
+    "corpus_wide": {
+      "n_verses": 12653,
+      "n_books": 20,
+      "mean_score": 1.8224730143881847,
+      "mean_word_count": 83.22911562475302,
+      "mean_proportion": 32.503388524460604,
+      "note": "score = (score_a + score_b)/2; word count = combined tokens"
+    },
+    "overlap_only": {
+      "n_verses": 1124,
+      "n_books": 5,
+      "mean_score": 1.786776770913753,
+      "mean_word_count": 80.82384341637011,
+      "mean_proportion": 32.48514234875445
+    }
+  },
+  "split_a_only": {
+    "corpus_wide": {
+      "n_verses": 12653,
+      "n_books": 20,
+      "mean_score": 1.9352803634107427,
+      "mean_word_count": 53.71176796016755,
+      "mean_proportion": 32.417120840907295
+    }
+  },
+  "split_b_only": {
+    "corpus_wide": {
+      "n_verses": 12653,
+      "n_books": 20,
+      "mean_score": 1.7096656653656266,
+      "mean_word_count": 29.517347664585476,
+      "mean_proportion": 32.589656208013906
+    }
+  }
+}

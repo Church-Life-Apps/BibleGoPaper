@@ -12,7 +12,7 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 \node[flowstep] (s1) {Load commentary\\for target verse};
 \node[flowstep, below=of s1] (s2) {Extract choicest quotes\\(GPT, 1--3 per commentator)};
 \node[flowstep, below=of s2] (s3) {Group quotes by\\Tier 1 / 2 / 3};
-\node[flowstep, below=of s3] (s4) {Generate BHT candidate\\(30--80 words, $\geq$50\% quotes)};
+\node[flowstep, below=of s3] (s4) {Generate BHT candidate\\(30--80 words, 30--90\% quote words)};
 \node[decision, below=0.5cm of s4] (d1) {Pass\\scoring?};
 \node[flowstep, right=0.8cm of d1, fill=tier3!15, draw=tier3] (retry) {Retry\\(up to 5$\times$)};
 \node[flowstep, below=0.5cm of d1] (s5) {Select best BHT\\by composite score};
@@ -33,7 +33,7 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 
 \subsection{Phase 1: Quote Extraction}
 
-Given a target verse, the system loads all available commentary from the curated corpus. Each commentator's text is submitted to GPT-3.5-turbo \citep{openai2023gpt35} with a \textit{choicest prompt} (iteratively refined from v0.1 to v2.2) that instructs the model to extract one to three ``striking, unique, and enlightening'' quotes. The prompt enforces strict constraints:
+Given a target verse, the system loads all available commentary from the curated corpus. Each commentator's text is submitted to GPT-3.5-turbo \citep{openai2023gpt35} with a \textit{choicest prompt} that instructs the model to extract one to three ``striking, unique, and enlightening'' quotes. The prompt enforces strict constraints:
 
 \begin{itemize}[nosep,leftmargin=*]
     \item Quotes must be \textbf{verbatim}---no paraphrasing or injected words.
@@ -55,21 +55,21 @@ As an alternative or supplement to direct quote extraction, the system supports 
 
 \noindent Chunks are embedded using HuggingFace's \texttt{all-mpnet-base-v2} sentence transformer \citep{song2020mpnet} and indexed with FAISS \citep{johnson2019faiss}. At query time, the target Bible verse is embedded and the top-$k$ most semantically similar commentary passages are retrieved, ranked by cosine similarity.
 
-This retrieval mechanism enables coverage of commentaries that span multiple verses, where a single verse may not have a dedicated entry. Four retrieval variants were evaluated: simple character-based RAG, recursive RAG (R-RAG), semantic RAG (S-RAG), and a tagging-based approach (TAG) that uses LLM-driven verse segmentation.
+This retrieval mechanism enables coverage of commentaries that span multiple verses, where a single verse may not have a dedicated entry. During OT development, several chunking and retrieval variants were explored---character-based, recursive, semantic, and a tagging-based approach using LLM-driven verse segmentation---to inform the deployed configuration described below.
 
 \subsection{Phase 3: BHT Generation}
 
-The core synthesis step produces a BHT from the extracted or retrieved quotes. Commentators are organized into three tiers (Section~\ref{sec:architecture}), and the selected quotes are submitted to GPT-3.5-turbo with a \textit{BHT prompt} (v0.1--v0.8) specifying the following constraints:
+The core synthesis step produces a BHT from the extracted or retrieved quotes. Commentators are organized into three tiers (Section~\ref{sec:architecture}), and the selected quotes are submitted to GPT-3.5-turbo with a \textit{BHT prompt} specifying the following constraints:
 
 \begin{itemize}[nosep,leftmargin=*]
-    \item The output must be a single coherent paragraph of 30--70 words in 1--3 sentences.
-    \item At least 50\% of the words must originate from the provided quotes.
+    \item The output must be a single coherent paragraph of 30--80 words in 1--3 sentences.
+    \item Between 30\% and 90\% of the words must originate from the provided quotes, with a target of roughly 70\%.
     \item The paragraph should draw primarily from Tier~1, sparingly from Tier~2, and minimally from Tier~3.
     \item No references to commentators by name, verse numbers, or the word ``passage.''
     \item The text must not take the form of a list.
 \end{itemize}
 
-\noindent The system makes up to five generation attempts per verse, scoring each candidate and retaining the highest-quality result.
+\noindent These same constraints are enforced at validation time as the hard acceptance gate (Section~\ref{sec:scoring}). The system makes up to five generation attempts per verse, scoring each candidate and retaining the highest-quality result.
 
 \subsection{Phase 4: Split-BHT Variant}
 
@@ -83,13 +83,14 @@ To explore whether multi-stage generation improves output quality, a \textit{spl
 \noindent Both sub-prompts were independently versioned and evaluated. This approach trades additional API calls for potentially higher coherence and fidelity.
 
 \subsection{Phase 5: Scoring and Validation}
+\label{sec:scoring}
 
 Every generated BHT undergoes a multi-dimensional quality assessment combining hard constraints with continuous metrics.
 
 \paragraph{Hard constraints.}
 \begin{itemize}[nosep,leftmargin=*]
     \item Word count within 30--80 (strict range: 20--100).
-    \item Quote token proportion between 30\% and 90\%.
+    \item Quote-word proportion between 30\% and 90\% (target 70\%).
     \item Absence of forbidden tokens (commentator names, verse references, ``passage'').
     \item No list formatting.
 \end{itemize}
@@ -102,7 +103,7 @@ Every generated BHT undergoes a multi-dimensional quality assessment combining h
     \item \textbf{Tier distribution}: The proportion of BHT content attributable to each commentator tier, measured via per-tier semantic similarity.
 \end{itemize}
 
-\noindent Among the up to five generation attempts, the BHT with the highest composite quality score is selected. The scoring function prioritizes commentary accuracy while penalizing outputs that violate hard constraints.
+\noindent Among the up to five generation attempts, the BHT with the highest composite commentary-accuracy score is selected. The scoring function prioritizes commentary accuracy while penalizing outputs that violate hard constraints.
 
 \subsection{Phase 6: Footnoting and Tagging}
 
@@ -110,7 +111,7 @@ The final phase establishes provenance links between the generated BHT and its s
 
 \paragraph{Footnoting.} Each sentence in the BHT is compared against all source quotes using cross-encoder scoring via \texttt{sentence-transformers} \citep{reimers2019sentencebert}. For each sentence, the system identifies the most similar quote and generates a footnote containing the commentator name, quote index, similarity score, and source location. This enables readers to trace any claim back to its originating commentary.
 
-\paragraph{Commentary tagging.} For commentaries spanning multiple verses, a \textit{tag commentary prompt} (v0.1--v0.7) instructs GPT to segment the text into per-verse sections. The output is a JSON structure mapping each verse number to its relevant content, enabling verse-level retrieval from range-based sources.
+\paragraph{Commentary tagging.} For commentaries spanning multiple verses, a \textit{tag commentary prompt} instructs GPT to segment the text into per-verse sections. The output is a JSON structure mapping each verse number to its relevant content, enabling verse-level retrieval from range-based sources.
 
 \subsection{The OT Challenge}
 \label{sec:otchallenge}

@@ -52,6 +52,21 @@ def load_bht_metrics(directory, metric_keys=None):
         record = {}
         for key in metric_keys:
             record[key] = best.get(key, None)
+
+        # Parse book / chapter / verse from filename so we can pair split-a
+        # and split-b records per-verse. Filenames look like
+        # '<book> <chap> <verse> bht.json', e.g. '1 Kings 1 1 bht.json'.
+        fname = os.path.basename(fpath)
+        base = fname[:-len(' bht.json')] if fname.endswith(' bht.json') else fname[:-5]
+        parts = base.rsplit(' ', 2)
+        if len(parts) == 3:
+            record['book'] = parts[0]
+            try:
+                record['chapter'] = int(parts[1])
+                record['verse'] = int(parts[2])
+            except ValueError:
+                record['chapter'] = parts[1]
+                record['verse'] = parts[2]
         
         # Also collect attempt-level data
         attempts = data.get('bhtAttempts', [])
@@ -82,9 +97,9 @@ def fig_quality_distribution(nt_records, ot_records):
             color=COLORS['nt'], edgecolor='white', linewidth=0.3)
     ax.hist(ot_scores, bins=bins, alpha=0.6, label=f'OT (n={len(ot_scores):,})',
             color=COLORS['ot'], edgecolor='white', linewidth=0.3)
-    ax.set_xlabel('Quality Score', fontsize=9)
+    ax.set_xlabel('Commentary Accuracy', fontsize=9)
     ax.set_ylabel('Number of Verses', fontsize=9)
-    ax.set_title('BHT Quality Score Distribution', fontsize=10, fontweight='bold')
+    ax.set_title('BHT Commentary Accuracy Distribution', fontsize=10, fontweight='bold')
     ax.legend(fontsize=8)
     ax.tick_params(labelsize=8)
     fig.tight_layout()
@@ -94,7 +109,7 @@ def fig_quality_distribution(nt_records, ot_records):
 
 
 def fig_attempt_trajectory(records):
-    """Figure 5: Average quality score by generation attempt number."""
+    """Figure 5: Average commentary-accuracy score by generation attempt number."""
     attempt_buckets = {}
     for r in records:
         for attempt_num, score in r.get('attemptScores', []):
@@ -120,8 +135,8 @@ def fig_attempt_trajectory(records):
                     xytext=(0, 12), ha='center', fontsize=6, color='gray')
     
     ax.set_xlabel('Generation Attempt', fontsize=9)
-    ax.set_ylabel('Quality Score', fontsize=9)
-    ax.set_title('Quality Score by Generation Attempt', fontsize=10, fontweight='bold')
+    ax.set_ylabel('Commentary Accuracy', fontsize=9)
+    ax.set_title('Commentary Accuracy by Generation Attempt', fontsize=10, fontweight='bold')
     ax.set_xticks(attempts)
     ax.tick_params(labelsize=8)
     fig.tight_layout()
@@ -131,9 +146,45 @@ def fig_attempt_trajectory(records):
 
 
 def fig_strategy_comparison(regular, split_a, split_b):
-    """Figure 6: Strategy comparison bar chart."""
+    """Figure 6: Pipeline comparison (Regular vs Split combined).
+
+    Split-A and Split-B are two stages of a single deployed pipeline whose
+    per-verse outputs are concatenated and served together. We combine them
+    per-verse (mean of the two scores, summed word counts) before comparing
+    to the Regular pipeline.
+    """
+    # Build per-verse index for split-a and split-b so we can pair them.
+    def key_of(r):
+        return (r.get('book'), r.get('chapter'), r.get('verse'))
+    sa_index = {key_of(r): r for r in split_a}
+    split_combined = []
+    for rb in split_b:
+        k = key_of(rb)
+        ra = sa_index.get(k)
+        if ra is None:
+            continue
+        def safe(x, d=0.0):
+            return x if isinstance(x, (int, float)) else d
+        score_a = safe(ra.get('qualityScore'))
+        score_b = safe(rb.get('qualityScore'))
+        ca_a = safe(ra.get('commentaryAccuracyScore'))
+        ca_b = safe(rb.get('commentaryAccuracyScore'))
+        va_a = safe(ra.get('verseAccuracyScore'))
+        va_b = safe(rb.get('verseAccuracyScore'))
+        qp_a = safe(ra.get('quoteTokenProportion'))
+        qp_b = safe(rb.get('quoteTokenProportion'))
+        wc_a = safe(ra.get('wordCount'))
+        wc_b = safe(rb.get('wordCount'))
+        split_combined.append({
+            'qualityScore': (score_a + score_b) / 2.0,
+            'commentaryAccuracyScore': (ca_a + ca_b) / 2.0,
+            'verseAccuracyScore': (va_a + va_b) / 2.0,
+            'quoteTokenProportion': (qp_a + qp_b) / 2.0,
+            'wordCount': wc_a + wc_b,
+        })
+
     strategies = {}
-    for name, records in [('Regular', regular), ('Split-A', split_a), ('Split-B', split_b)]:
+    for name, records in [('Regular', regular), ('Split (combined)', split_combined)]:
         scores = [r['qualityScore'] for r in records if r.get('qualityScore')]
         ca_scores = [r['commentaryAccuracyScore'] for r in records if r.get('commentaryAccuracyScore')]
         va_scores = [r['verseAccuracyScore'] for r in records if r.get('verseAccuracyScore')]
@@ -147,22 +198,23 @@ def fig_strategy_comparison(regular, split_a, split_b):
             'quote_prop': np.mean(qp) if qp else 0,
             'n': len(scores),
         }
-    
+
     fig, axes = plt.subplots(1, 3, figsize=(7, 2.8))
     names = list(strategies.keys())
-    colors = [COLORS['ot'], COLORS['split_a'], COLORS['split_b']]
-    
-    # Quality Score
-    vals = [strategies[n]['quality'] for n in names]
-    axes[0].bar(names, vals, color=colors, edgecolor='white', linewidth=0.5)
-    axes[0].set_ylabel('Score', fontsize=8)
-    axes[0].set_title('Quality Score', fontsize=9, fontweight='bold')
-    axes[0].tick_params(labelsize=7)
+    colors = [COLORS['ot'], COLORS['split_a']]
     
     # Commentary Accuracy
     vals = [strategies[n]['commentary_acc'] for n in names]
+    axes[0].bar(names, vals, color=colors, edgecolor='white', linewidth=0.5)
+    axes[0].set_ylabel('Score', fontsize=8)
+    axes[0].set_title('Commentary Accuracy', fontsize=9, fontweight='bold')
+    axes[0].tick_params(labelsize=7)
+    
+    # Word Count
+    vals = [strategies[n]['word_count'] for n in names]
     axes[1].bar(names, vals, color=colors, edgecolor='white', linewidth=0.5)
-    axes[1].set_title('Commentary Accuracy', fontsize=9, fontweight='bold')
+    axes[1].set_ylabel('words', fontsize=8)
+    axes[1].set_title('Word Count', fontsize=9, fontweight='bold')
     axes[1].tick_params(labelsize=7)
     
     # Quote Proportion
@@ -295,7 +347,7 @@ def fig_cross_model():
     # Quality scores
     score_means = [np.mean(models[k]['scores']) if models[k]['scores'] else 0 for k in models]
     axes[0].bar(names, score_means, color=colors_list[:len(names)], edgecolor='white')
-    axes[0].set_title('Quality Score', fontsize=9, fontweight='bold')
+    axes[0].set_title('Commentary Accuracy', fontsize=9, fontweight='bold')
     axes[0].tick_params(labelsize=7)
     
     # Word counts
@@ -332,7 +384,7 @@ def print_aggregate_stats(nt_records, ot_records, split_a_records, split_b_recor
         
         print(f"--- {name} (n={len(records)}) ---")
         if scores:
-            print(f"  Quality Score: {np.mean(scores):.3f} ± {np.std(scores):.3f} "
+            print(f"  Commentary Accuracy: {np.mean(scores):.3f} ± {np.std(scores):.3f} "
                   f"(median={np.median(scores):.3f}, min={np.min(scores):.3f}, max={np.max(scores):.3f})")
         if wc:
             print(f"  Word Count: {np.mean(wc):.1f} ± {np.std(wc):.1f} "
