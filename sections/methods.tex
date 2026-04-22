@@ -33,7 +33,7 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 
 \subsection{Phase 1: Quote Extraction}
 
-Given a target verse, the system loads all available commentary from the curated corpus. Each commentator's text is submitted to GPT-3.5-turbo \citep{openai2023gpt35} with a \textit{choicest prompt} (iteratively refined from v0.1 to v2.2) that instructs the model to extract one to three ``striking, unique, and enlightening'' quotes. The prompt enforces strict constraints:
+Given a target verse, the system loads all available commentary from the curated corpus. Each commentator's text is submitted to GPT-3.5-turbo \citep{openai2023gpt35} with a \textit{choicest prompt} that instructs the model to extract one to three ``striking, unique, and enlightening'' quotes. The prompt enforces strict constraints:
 
 \begin{itemize}[nosep,leftmargin=*]
     \item Quotes must be \textbf{verbatim}---no paraphrasing or injected words.
@@ -59,7 +59,7 @@ This retrieval mechanism enables coverage of commentaries that span multiple ver
 
 \subsection{Phase 3: BHT Generation}
 
-The core synthesis step produces a BHT from the extracted or retrieved quotes. Commentators are organized into three tiers (Section~\ref{sec:architecture}), and the selected quotes are submitted to GPT-3.5-turbo with a \textit{BHT prompt} (v0.1--v0.8) specifying the following constraints:
+The core synthesis step produces a BHT from the extracted or retrieved quotes. Commentators are organized into three tiers (Section~\ref{sec:architecture}), and the selected quotes are submitted to GPT-3.5-turbo with a \textit{BHT prompt} specifying the following constraints:
 
 \begin{itemize}[nosep,leftmargin=*]
     \item The output must be a single coherent paragraph of 30--70 words in 1--3 sentences.
@@ -111,7 +111,7 @@ The final phase establishes provenance links between the generated BHT and its s
 
 \paragraph{Footnoting.} Each sentence in the BHT is compared against all source quotes using cross-encoder scoring via \texttt{sentence-transformers} \citep{reimers2019sentencebert}. For each sentence, the system identifies the most similar quote and generates a footnote containing the commentator name, quote index, similarity score, and source location. This enables readers to trace any claim back to its originating commentary.
 
-\paragraph{Commentary tagging.} For commentaries spanning multiple verses, a \textit{tag commentary prompt} (v0.1--v0.7) instructs GPT to segment the text into per-verse sections. The output is a JSON structure mapping each verse number to its relevant content, enabling verse-level retrieval from range-based sources.
+\paragraph{Commentary tagging.} For commentaries spanning multiple verses, a \textit{tag commentary prompt} instructs GPT to segment the text into per-verse sections. The output is a JSON structure mapping each verse number to its relevant content, enabling verse-level retrieval from range-based sources.
 
 \subsection{The OT Challenge}
 \label{sec:otchallenge}
