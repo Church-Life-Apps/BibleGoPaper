@@ -97,9 +97,9 @@ def fig_quality_distribution(nt_records, ot_records):
             color=COLORS['nt'], edgecolor='white', linewidth=0.3)
     ax.hist(ot_scores, bins=bins, alpha=0.6, label=f'OT (n={len(ot_scores):,})',
             color=COLORS['ot'], edgecolor='white', linewidth=0.3)
-    ax.set_xlabel('Quality Score', fontsize=9)
+    ax.set_xlabel('Commentary Accuracy', fontsize=9)
     ax.set_ylabel('Number of Verses', fontsize=9)
-    ax.set_title('BHT Quality Score Distribution', fontsize=10, fontweight='bold')
+    ax.set_title('BHT Commentary Accuracy Distribution', fontsize=10, fontweight='bold')
     ax.legend(fontsize=8)
     ax.tick_params(labelsize=8)
     fig.tight_layout()
@@ -109,7 +109,7 @@ def fig_quality_distribution(nt_records, ot_records):
 
 
 def fig_attempt_trajectory(records):
-    """Figure 5: Average quality score by generation attempt number."""
+    """Figure 5: Average commentary-accuracy score by generation attempt number."""
     attempt_buckets = {}
     for r in records:
         for attempt_num, score in r.get('attemptScores', []):
@@ -135,8 +135,8 @@ def fig_attempt_trajectory(records):
                     xytext=(0, 12), ha='center', fontsize=6, color='gray')
     
     ax.set_xlabel('Generation Attempt', fontsize=9)
-    ax.set_ylabel('Quality Score', fontsize=9)
-    ax.set_title('Quality Score by Generation Attempt', fontsize=10, fontweight='bold')
+    ax.set_ylabel('Commentary Accuracy', fontsize=9)
+    ax.set_title('Commentary Accuracy by Generation Attempt', fontsize=10, fontweight='bold')
     ax.set_xticks(attempts)
     ax.tick_params(labelsize=8)
     fig.tight_layout()
@@ -203,17 +203,18 @@ def fig_strategy_comparison(regular, split_a, split_b):
     names = list(strategies.keys())
     colors = [COLORS['ot'], COLORS['split_a']]
     
-    # Quality Score
-    vals = [strategies[n]['quality'] for n in names]
-    axes[0].bar(names, vals, color=colors, edgecolor='white', linewidth=0.5)
-    axes[0].set_ylabel('Score', fontsize=8)
-    axes[0].set_title('Quality Score', fontsize=9, fontweight='bold')
-    axes[0].tick_params(labelsize=7)
-    
     # Commentary Accuracy
     vals = [strategies[n]['commentary_acc'] for n in names]
+    axes[0].bar(names, vals, color=colors, edgecolor='white', linewidth=0.5)
+    axes[0].set_ylabel('Score', fontsize=8)
+    axes[0].set_title('Commentary Accuracy', fontsize=9, fontweight='bold')
+    axes[0].tick_params(labelsize=7)
+    
+    # Word Count
+    vals = [strategies[n]['word_count'] for n in names]
     axes[1].bar(names, vals, color=colors, edgecolor='white', linewidth=0.5)
-    axes[1].set_title('Commentary Accuracy', fontsize=9, fontweight='bold')
+    axes[1].set_ylabel('words', fontsize=8)
+    axes[1].set_title('Word Count', fontsize=9, fontweight='bold')
     axes[1].tick_params(labelsize=7)
     
     # Quote Proportion
@@ -346,7 +347,7 @@ def fig_cross_model():
     # Quality scores
     score_means = [np.mean(models[k]['scores']) if models[k]['scores'] else 0 for k in models]
     axes[0].bar(names, score_means, color=colors_list[:len(names)], edgecolor='white')
-    axes[0].set_title('Quality Score', fontsize=9, fontweight='bold')
+    axes[0].set_title('Commentary Accuracy', fontsize=9, fontweight='bold')
     axes[0].tick_params(labelsize=7)
     
     # Word counts
@@ -383,7 +384,7 @@ def print_aggregate_stats(nt_records, ot_records, split_a_records, split_b_recor
         
         print(f"--- {name} (n={len(records)}) ---")
         if scores:
-            print(f"  Quality Score: {np.mean(scores):.3f} ± {np.std(scores):.3f} "
+            print(f"  Commentary Accuracy: {np.mean(scores):.3f} ± {np.std(scores):.3f} "
                   f"(median={np.median(scores):.3f}, min={np.min(scores):.3f}, max={np.max(scores):.3f})")
         if wc:
             print(f"  Word Count: {np.mean(wc):.1f} ± {np.std(wc):.1f} "
