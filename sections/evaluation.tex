@@ -1,11 +1,11 @@
 % Evaluation section - will be populated with real metrics and chart references
 % after generate-charts produces the figures
 
-We evaluate BibleGoAI across multiple dimensions: aggregate quality metrics, generation strategy comparison, generation attempt analysis, and readability. All metrics are computed from the full corpus of generated BHTs: 7{,}957 New Testament verses and the full 39-book Old Testament, which is served via two complementary pipelines---a single-pass \emph{regular} pipeline (24 books, 10{,}492 verses) and a two-stage \emph{split} pipeline (20 books, 12{,}653 verses) whose two stages (\emph{split-a} and \emph{split-b}) are concatenated into a single served BHT per verse. The two pipelines overlap on 5 books (1~Kings, Esther, Habakkuk, Hosea, Micah), enabling a head-to-head comparison on shared texts in addition to corpus-wide aggregates.
+We evaluate BibleGoAI across multiple dimensions: aggregate quality metrics, pipeline comparison, generation attempt analysis, and commentator tier contribution. All metrics are computed from the full corpus of generated BHTs: 7{,}957 New Testament verses and the full 39-book Old Testament, which is served via two complementary pipelines---a single-pass \emph{regular} pipeline (24 books, 10{,}492 verses) and a two-stage \emph{split} pipeline (20 books, 12{,}653 verses) whose two stages (\emph{split-a} and \emph{split-b}) are concatenated into a single served BHT per verse. The two pipelines overlap on 5 books (1~Kings, Esther, Habakkuk, Hosea, Micah), enabling a head-to-head comparison on shared texts in addition to corpus-wide aggregates.
 
 \subsection{Aggregate Quality Metrics}
 
-Table~\ref{tab:aggregate} summarizes the key metrics across the NT and OT corpora. Quality scores reflect the composite tier-weighted commentary accuracy, while quote proportion measures the fraction of BHT words drawn directly from source commentary.
+Table~\ref{tab:aggregate} summarizes the key metrics across the NT and OT corpora. The commentary-accuracy score (identical to what is exposed in legacy JSON outputs as \texttt{qualityScore}) is a composite tier-weighted similarity between the BHT and its source quotes; quote proportion measures the fraction of BHT words drawn directly from source commentary.
 
 \begin{table}[htbp]
 \centering
@@ -16,7 +16,7 @@ Table~\ref{tab:aggregate} summarizes the key metrics across the NT and OT corpor
 \toprule
 \textbf{Metric} & \textbf{NT ($n{=}7{,}957$)} & \textbf{OT ($n{=}10{,}492$)} \\
 \midrule
-Quality Score & $1.912 \pm 0.348$ & $1.785 \pm 0.282$ \\
+Commentary Accuracy & $1.912 \pm 0.348$ & $1.785 \pm 0.282$ \\
 Word Count & $84.2 \pm 11.1$ & $62.9 \pm 11.6$ \\
 Quote Proportion (\%) & $39.6 \pm 7.4$ & $31.8 \pm 6.3$ \\
 Verse Accuracy & --- & $0.417 \pm 0.147$ \\
@@ -24,7 +24,7 @@ Verse Accuracy & --- & $0.417 \pm 0.147$ \\
 \end{tabular}
 \end{table}
 
-\noindent The NT corpus achieves higher average quality scores (1.912 vs.\ 1.785), likely reflecting the more extensive commentary coverage for New Testament verses and the maturity of the NT prompt versions. NT BHTs are also longer on average (84 vs.\ 63 words) with higher quote proportions (39.6\% vs.\ 31.8\%), suggesting richer source material for synthesis. Verse accuracy was computed only for the OT corpus; see below for discussion.
+\noindent The NT corpus shows higher average commentary-accuracy scores (1.912 vs.\ 1.785), with longer BHTs (84 vs.\ 63 words) and higher quote proportions (39.6\% vs.\ 31.8\%). These differences are consistent with the structural contrast between the NT pipeline (verse-by-verse commentary, direct per-verse quote extraction) and the OT pipeline (multi-verse commentary, retrieval-augmented generation) described in Section~\ref{sec:methods}. Verse accuracy was computed only for the OT corpus; see below for discussion.
 
 \paragraph{A note on NT word count.} The observed NT mean (84.2 words) sits just above the soft word-limit upper bound (80). The generation loop runs up to five attempts per verse and, if no candidate satisfies the full set of soft constraints (30--80 words, quote-proportion, etc.), the highest-scoring attempt is retained regardless of which constraints it misses. This best-of-five fallback prioritizes commentary quality over strict length compliance, yielding a mean that slightly overshoots the soft cap; see Section~\ref{sec:methods} for the full constraint-enforcement protocol.
 
@@ -75,12 +75,12 @@ Quote Prop.\ (\%) & 31.8 & 32.5 \\
 
 \subsection{Generation Attempt Analysis}
 
-The system generates up to five candidate BHTs per verse and selects the highest-scoring attempt. Figure~\ref{fig:attempts} shows the average quality score by attempt number, revealing whether iterative generation yields meaningful improvement.
+The system generates up to five candidate BHTs per verse and selects the highest-scoring attempt. Figure~\ref{fig:attempts} shows the average commentary-accuracy score by attempt number, revealing whether iterative generation yields meaningful improvement.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\columnwidth]{figures/attempt_trajectory.pdf}
-\caption{Average quality score by generation attempt number (1--5). Later attempts show diminishing returns.}
+\caption{Average commentary-accuracy score by generation attempt number (1--5). Later attempts show diminishing returns.}
 \label{fig:attempts}
 \end{figure}
 
@@ -95,36 +95,36 @@ Figure~\ref{fig:tiers} shows the distribution of semantic similarity across the 
 \label{fig:tiers}
 \end{figure}
 
-\subsection{Quality Score Distribution}
+\subsection{Commentary-Accuracy Score Distribution}
 
-Figure~\ref{fig:quality_dist} presents the distribution of quality scores across all NT and OT verses, showing the overall consistency and range of the system's output.
+Figure~\ref{fig:quality_dist} presents the distribution of commentary-accuracy scores across all NT and OT verses, showing the overall consistency and range of the system's output.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\columnwidth]{figures/quality_distribution.pdf}
-\caption{Distribution of BHT quality scores across NT and OT corpora.}
+\caption{Distribution of BHT commentary-accuracy scores across NT and OT corpora.}
 \label{fig:quality_dist}
 \end{figure}
 
 \subsection{Human Evaluation}
 
-In addition to automated metrics, BHT quality was evaluated through six rounds of structured user testing conducted with members of the project's Bible study community:
+In addition to automated metrics, BHT quality was evaluated through two rounds of structured user testing with members of the project's Bible study community:
 
 \begin{itemize}[nosep,leftmargin=*]
     \item \textbf{BHT V2 Quality Test}: Human raters scored NT BHTs on a normalized quality scale. Scores ranged from 50.4 to 94.2 out of 100, with a mean of 67.5. The highest-rated BHT (Romans 6:7, score 94.2) demonstrated strong synthesis of commentary insights, while lower-scoring BHTs guided subsequent prompt refinements.
     \item \textbf{OT BHT V1 Quality Test}: A separate round evaluated the first generation of OT BHTs, providing feedback that informed the comparison of RAG versus tagging strategies.
 \end{itemize}
 
-\noindent Table~\ref{tab:human} presents the human quality scores from the BHT V2 evaluation.
+\noindent Table~\ref{tab:human} presents the human quality scores from the BHT V2 evaluation. Note that these are a separate metric from the automated \emph{commentary-accuracy} score discussed above: raters scored each BHT on a normalized 0--100 quality scale.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Human evaluation scores (BHT V2 Quality Test).}
+\caption{Human evaluation scores (BHT V2 Quality Test). Human-assigned 0--100 quality ratings; distinct from the automated commentary-accuracy score in Table~\ref{tab:aggregate}.}
 \label{tab:human}
 \begin{tabular}{@{}lc@{}}
 \toprule
-\textbf{Verse} & \textbf{Quality Score} \\
+\textbf{Verse} & \textbf{Human Score} \\
 \midrule
 Romans 6:7 & 94.2 \\
 John 5:22 & 80.1 \\
