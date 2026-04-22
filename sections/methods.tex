@@ -12,7 +12,7 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 \node[flowstep] (s1) {Load commentary\\for target verse};
 \node[flowstep, below=of s1] (s2) {Extract choicest quotes\\(GPT, 1--3 per commentator)};
 \node[flowstep, below=of s2] (s3) {Group quotes by\\Tier 1 / 2 / 3};
-\node[flowstep, below=of s3] (s4) {Generate BHT candidate\\(30--80 words, $\geq$50\% quotes)};
+\node[flowstep, below=of s3] (s4) {Generate BHT candidate\\(30--80 words, 30--90\% quote words)};
 \node[decision, below=0.5cm of s4] (d1) {Pass\\scoring?};
 \node[flowstep, right=0.8cm of d1, fill=tier3!15, draw=tier3] (retry) {Retry\\(up to 5$\times$)};
 \node[flowstep, below=0.5cm of d1] (s5) {Select best BHT\\by composite score};
@@ -69,7 +69,7 @@ The core synthesis step produces a BHT from the extracted or retrieved quotes. C
     \item The text must not take the form of a list.
 \end{itemize}
 
-\noindent The system makes up to five generation attempts per verse, scoring each candidate and retaining the highest-quality result.
+\noindent These constraints are expressed in natural language in the prompt itself; the \emph{hard} acceptance gate enforced at validation time (Section~\ref{sec:scoring}) uses a wider 30--90\% range for quote-word proportion, so candidates that meet the spirit of the 50\% target but fall slightly short are not immediately discarded. The system makes up to five generation attempts per verse, scoring each candidate and retaining the highest-quality result.
 
 \subsection{Phase 4: Split-BHT Variant}
 
@@ -83,13 +83,14 @@ To explore whether multi-stage generation improves output quality, a \textit{spl
 \noindent Both sub-prompts were independently versioned and evaluated. This approach trades additional API calls for potentially higher coherence and fidelity.
 
 \subsection{Phase 5: Scoring and Validation}
+\label{sec:scoring}
 
 Every generated BHT undergoes a multi-dimensional quality assessment combining hard constraints with continuous metrics.
 
 \paragraph{Hard constraints.}
 \begin{itemize}[nosep,leftmargin=*]
     \item Word count within 30--80 (strict range: 20--100).
-    \item Quote token proportion between 30\% and 90\%.
+    \item Quote-word proportion between 30\% and 90\% (target 70\%).
     \item Absence of forbidden tokens (commentator names, verse references, ``passage'').
     \item No list formatting.
 \end{itemize}
