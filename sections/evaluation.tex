@@ -32,43 +32,44 @@ Verse Accuracy & --- & $0.417 \pm 0.147$ \\
 \label{sec:verse-acc}
 The \emph{verse accuracy} metric---cosine similarity between the BHT and the target-verse embedding---was computed only for the OT corpus in the reported results. Because the NT and OT pipelines differ (direct per-verse extraction for NT vs.\ retrieval-augmented generation for OT; see Section~\ref{sec:otchallenge}), the OT verse-accuracy value ($0.417 \pm 0.147$) should be read as a sanity check on the OT RAG pipeline rather than as directly comparable to a would-be NT value. Computing this metric retrospectively across the full NT corpus is straightforward and is noted as near-term follow-up work.
 
-\subsection{Generation Strategy Comparison}
+\subsection{Pipeline Comparison: Regular vs.\ Split}
+\label{sec:strategy}
 
-We compare four retrieval and generation strategies applied to OT verses, where the same underlying commentary corpus is processed through different pipelines:
+Two OT generation pipelines were deployed, each covering a different subset of the OT canon:
 
 \begin{itemize}[nosep,leftmargin=*]
-    \item \textbf{Regular}: Standard single-pass generation from tagged commentary.
-    \item \textbf{Split-A}: First stage of the two-stage split pipeline (draft synthesis).
-    \item \textbf{Split-B}: Second stage refinement of Split-A output.
-    \item \textbf{RAG variants}: Character-based, recursive, and semantic retrieval.
+    \item \textbf{Regular pipeline}: A single-pass generation that produces one 30--80 word BHT per verse from tagged commentary. Deployed for 24 OT books (10{,}492 verses), predominantly wisdom, prophetic, and selected historical books where per-verse commentary coverage was adequate.
+    \item \textbf{Split pipeline}: A two-stage generation where \emph{split-a} produces a short factual paragraph and \emph{split-b} adds one enriching sentence; the two outputs are concatenated per-verse into a single served BHT, with a combined score computed as the mean of the two stage scores. Deployed for 20 OT books (12{,}653 verses), predominantly Pentateuch and historical narrative where verse-range commentary dominates and the split was developed to handle broader context.
 \end{itemize}
 
-Figure~\ref{fig:strategy} compares the average quality scores across strategies.
+\paragraph{A note on the comparison.} The two pipelines were developed sequentially and deployed on mostly disjoint book sets. Five books (1~Kings, Esther, Habakkuk, Hosea, Micah) appear in both pipelines' outputs, but inspection reveals that the two pipelines covered \emph{different chapters} of these books with no overlapping verses---the regular-pipeline outputs for these books are experimental partial runs that never reached production. As a result, no paired per-verse head-to-head comparison is possible from the deployed corpus; Table~\ref{tab:strategy} reports corpus-wide means over each pipeline's own book set.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Generation strategy comparison across OT verses.}
+\caption{Pipeline comparison across the OT corpus. Numbers are corpus-wide means over each pipeline's own deployed book set (regular: 24 books; split: 20 books); the two sets overlap at the book level on 5 books but the regular-pipeline outputs for those books are partial experimental runs covering different verses than the split-pipeline outputs, so a paired per-verse comparison is not possible.}
 \label{tab:strategy}
-\begin{tabular}{@{}lccc@{}}
+\begin{tabular}{@{}lcc@{}}
 \toprule
-\textbf{Metric} & \textbf{Regular} & \textbf{Split-A} & \textbf{Split-B} \\
+\textbf{Metric} & \textbf{Regular} & \textbf{Split (combined)} \\
 \midrule
-$n$ (verses) & 10{,}492 & 12{,}653 & 12{,}653 \\
-Quality Score & 1.785 & \textbf{1.935} & 1.710 \\
-Verse Accuracy & 0.417 & \textbf{0.467} & 0.353 \\
-Word Count & 62.9 & 55.1 & 30.8 \\
-Quote Prop.\ (\%) & 31.8 & 32.4 & 32.6 \\
+$n$ (verses) & 10{,}492 & 12{,}653 \\
+$n$ (books) & 24 & 20 \\
+Commentary Accuracy & 1.785 & 1.822 \\
+Word Count & 61.4 & 83.2 \\
+Quote Prop.\ (\%) & 31.8 & 32.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent Split-A achieves the highest quality scores (1.935) and verse accuracy (0.467), outperforming both the regular single-pass approach and the Split-B refinement stage. Notably, Split-B produces significantly shorter BHTs (30.8 words on average) with lower scores, suggesting that the refinement step's aggressive compression may sacrifice content quality. The regular strategy offers a balance between length and quality.
+\noindent The two pipelines produce BHTs with similar commentary-accuracy means (1.78 vs.\ 1.82) and near-identical quote-token proportions (${\sim}32\%$), indicating comparable source-fidelity behavior. The main observable difference is length: split-pipeline BHTs are roughly 35\% longer (83 vs.\ 61 words) because the concatenation of \emph{split-a} and \emph{split-b} yields a two-paragraph output. Because the two pipelines cover different book sets, these corpus-wide means should be read as per-pipeline performance characteristics on the books each was actually deployed to---not as a controlled ablation.
+
+\paragraph{Stage-level view (split pipeline only).} Within the split pipeline, \emph{split-a} produces longer, higher-scoring paragraphs on its own (mean commentary-accuracy 1.935, mean word count 53.7) while \emph{split-b} produces shorter, lower-scoring enriching sentences (mean 1.710, mean word count 29.5). These are not alternative strategies---both stages always run together, and the combined served BHT is their concatenation---but the per-stage numbers illustrate the intended asymmetric roles of the two sub-prompts.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\columnwidth]{figures/strategy_comparison.pdf}
-\caption{Average quality scores by generation strategy across OT verses.}
+\caption{Corpus-wide means for the Regular and Split (combined) OT pipelines across each pipeline's own book set.}
 \label{fig:strategy}
 \end{figure}
 

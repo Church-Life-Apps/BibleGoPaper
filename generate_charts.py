@@ -52,6 +52,21 @@ def load_bht_metrics(directory, metric_keys=None):
         record = {}
         for key in metric_keys:
             record[key] = best.get(key, None)
+
+        # Parse book / chapter / verse from filename so we can pair split-a
+        # and split-b records per-verse. Filenames look like
+        # '<book> <chap> <verse> bht.json', e.g. '1 Kings 1 1 bht.json'.
+        fname = os.path.basename(fpath)
+        base = fname[:-len(' bht.json')] if fname.endswith(' bht.json') else fname[:-5]
+        parts = base.rsplit(' ', 2)
+        if len(parts) == 3:
+            record['book'] = parts[0]
+            try:
+                record['chapter'] = int(parts[1])
+                record['verse'] = int(parts[2])
+            except ValueError:
+                record['chapter'] = parts[1]
+                record['verse'] = parts[2]
         
         # Also collect attempt-level data
         attempts = data.get('bhtAttempts', [])
@@ -131,9 +146,45 @@ def fig_attempt_trajectory(records):
 
 
 def fig_strategy_comparison(regular, split_a, split_b):
-    """Figure 6: Strategy comparison bar chart."""
+    """Figure 6: Pipeline comparison (Regular vs Split combined).
+
+    Split-A and Split-B are two stages of a single deployed pipeline whose
+    per-verse outputs are concatenated and served together. We combine them
+    per-verse (mean of the two scores, summed word counts) before comparing
+    to the Regular pipeline.
+    """
+    # Build per-verse index for split-a and split-b so we can pair them.
+    def key_of(r):
+        return (r.get('book'), r.get('chapter'), r.get('verse'))
+    sa_index = {key_of(r): r for r in split_a}
+    split_combined = []
+    for rb in split_b:
+        k = key_of(rb)
+        ra = sa_index.get(k)
+        if ra is None:
+            continue
+        def safe(x, d=0.0):
+            return x if isinstance(x, (int, float)) else d
+        score_a = safe(ra.get('qualityScore'))
+        score_b = safe(rb.get('qualityScore'))
+        ca_a = safe(ra.get('commentaryAccuracyScore'))
+        ca_b = safe(rb.get('commentaryAccuracyScore'))
+        va_a = safe(ra.get('verseAccuracyScore'))
+        va_b = safe(rb.get('verseAccuracyScore'))
+        qp_a = safe(ra.get('quoteTokenProportion'))
+        qp_b = safe(rb.get('quoteTokenProportion'))
+        wc_a = safe(ra.get('wordCount'))
+        wc_b = safe(rb.get('wordCount'))
+        split_combined.append({
+            'qualityScore': (score_a + score_b) / 2.0,
+            'commentaryAccuracyScore': (ca_a + ca_b) / 2.0,
+            'verseAccuracyScore': (va_a + va_b) / 2.0,
+            'quoteTokenProportion': (qp_a + qp_b) / 2.0,
+            'wordCount': wc_a + wc_b,
+        })
+
     strategies = {}
-    for name, records in [('Regular', regular), ('Split-A', split_a), ('Split-B', split_b)]:
+    for name, records in [('Regular', regular), ('Split (combined)', split_combined)]:
         scores = [r['qualityScore'] for r in records if r.get('qualityScore')]
         ca_scores = [r['commentaryAccuracyScore'] for r in records if r.get('commentaryAccuracyScore')]
         va_scores = [r['verseAccuracyScore'] for r in records if r.get('verseAccuracyScore')]
@@ -147,10 +198,10 @@ def fig_strategy_comparison(regular, split_a, split_b):
             'quote_prop': np.mean(qp) if qp else 0,
             'n': len(scores),
         }
-    
+
     fig, axes = plt.subplots(1, 3, figsize=(7, 2.8))
     names = list(strategies.keys())
-    colors = [COLORS['ot'], COLORS['split_a'], COLORS['split_b']]
+    colors = [COLORS['ot'], COLORS['split_a']]
     
     # Quality Score
     vals = [strategies[n]['quality'] for n in names]
