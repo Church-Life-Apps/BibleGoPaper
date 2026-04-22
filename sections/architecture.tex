@@ -12,7 +12,7 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
     grouplabel/.style={font=\tiny\sffamily\bfseries, anchor=east}
 ]
 % Data sources
-\node[data] (data) {NASB Bible (66 books) + Commentary Corpus (20+)};
+\node[data] (data) {NASB Bible (66 books) + Commentary Corpus (14)};
 
 % Pipeline steps - straight vertical
 \node[block, below=0.8cm of data] (extract) {1. Quote Extraction \quad {\tiny\itshape GPT-3.5}};
@@ -54,47 +54,72 @@ The system operates on two primary data sources:
 
 \paragraph{Biblical text.} The New American Standard Bible (NASB, 1995 edition) provides the target verse text for all 66 books of the Bible. Each verse is stored as a JSON record with chapter, verse number, and text content. The NASB was selected for its reputation as a highly literal translation, which aligns well with the commentary corpus.
 
-\paragraph{Commentary corpus.} The commentary collection comprises over 20 curated sources spanning the 16th through 20th centuries. For the New Testament, nine primary commentators form \textbf{Tier~1}: Henry Alford, Jamieson-Fausset-Brown, Albert Barnes, Marvin Vincent, John Calvin, Philip Schaff, Archibald T. Robertson, John Gill, and John Wesley. Additional commentators are assigned to Tier~2 and Tier~3 based on their breadth and scholarly standing. For the Old Testament, the corpus includes Keil \& Delitzsch, Albert Barnes, Adam Clarke, and specialty commentators such as Arthur W. Pink and Charles H. Mackintosh.
+\paragraph{Commentary corpus.} The commentary collection comprises 14 curated commentators spanning the 16th through 20th centuries (four centuries of biblical scholarship). For the New Testament, nine commentators form the active corpus: Henry Alford, Jamieson-Fausset-Brown, Albert Barnes, Marvin Vincent, John Calvin, Philip Schaff, Archibald T. Robertson, John Gill, and John Wesley. They are organized into three tiers (Table~\ref{tab:nt-commentators}). For the Old Testament, twelve commentators are deployed: Jamieson-Fausset-Brown, Albert Barnes, John Gill, Keil \& Delitzsch, Cyrus I. Scofield, Johann P. Lange, John Calvin, William Kelly, Charles H. Mackintosh, Charles A. Coates, Arthur W. Pink, and Henri L. Rossier, similarly tiered (Table~\ref{tab:ot-commentators}). Four commentators (Jamieson-Fausset-Brown, Albert Barnes, John Gill, John Calvin) appear in both the NT and OT corpora, sometimes at different tiers.
 
 All commentaries were curated and vetted by a group of Christians from the Cleveland, Ohio area, ensuring theological reliability and scholarly quality.
 
 \subsection{Commentator Tiering}
 
-The tiering system serves a critical role in the generation process. When synthesizing a BHT, the LLM is instructed to draw \textit{primarily} from Tier~1 commentators, \textit{sparingly} from Tier~2, and \textit{minimally} from Tier~3. This weighted approach ensures that the most trusted and comprehensive commentators dominate the output while allowing supplementary perspectives to enrich the synthesis. Table~\ref{tab:commentators} lists the Tier~1 commentators and their approximate date ranges.
+The tiering system serves a critical role in the generation process. When synthesizing a BHT, the LLM is instructed to draw \textit{primarily} from Tier~1 commentators, \textit{sparingly} from Tier~2, and \textit{minimally} from Tier~3. This weighted approach ensures that the most trusted and comprehensive commentators dominate the output while allowing supplementary perspectives to enrich the synthesis. Tables~\ref{tab:nt-commentators} and~\ref{tab:ot-commentators} list the active NT and OT commentators with their tier assignments and approximate date ranges.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Tier~1 New Testament commentators.}
-\label{tab:commentators}
-\begin{tabular}{@{}ll@{}}
+\caption{Active New Testament commentators and tier assignments. Tier assignments are defined per testament; several commentators (Jamieson-Fausset-Brown, Albert Barnes, John Gill, John Calvin) appear in both the NT and OT corpora and may receive different tiers.}
+\label{tab:nt-commentators}
+\begin{tabular}{@{}lll@{}}
 \toprule
-\textbf{Commentator} & \textbf{Era} \\
+\textbf{Commentator} & \textbf{Era} & \textbf{Tier} \\
 \midrule
-Henry Alford & 1810--1871 \\
-Jamieson, Fausset \& Brown & 1871 \\
-Albert Barnes & 1798--1870 \\
-Marvin R. Vincent & 1834--1922 \\
-John Calvin & 1509--1564 \\
-Philip Schaff & 1819--1893 \\
-Archibald T. Robertson & 1863--1934 \\
-John Gill & 1697--1771 \\
-John Wesley & 1703--1791 \\
+Henry Alford & 1810--1871 & 1 \\
+Jamieson, Fausset \& Brown & 1871 & 1 \\
+Marvin R. Vincent & 1834--1922 & 1 \\
+Archibald T. Robertson & 1863--1934 & 1 \\
+Albert Barnes & 1798--1870 & 2 \\
+Philip Schaff & 1819--1893 & 2 \\
+John Wesley & 1703--1791 & 3 \\
+John Gill & 1697--1771 & 3 \\
+John Calvin & 1509--1564 & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Active Old Testament commentators and tier assignments.}
+\label{tab:ot-commentators}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Commentator} & \textbf{Era} & \textbf{Tier} \\
+\midrule
+Keil \& Delitzsch & 1807--1890 & 1 \\
+Arthur W. Pink & 1886--1952 & 1 \\
+Henri L. Rossier & 1835--1928 & 1 \\
+Charles A. Coates & 1862--1945 & 1 \\
+Charles H. Mackintosh & 1820--1896 & 1 \\
+Jamieson, Fausset \& Brown & 1871 & 2 \\
+Johann P. Lange & 1802--1884 & 2 \\
+William Kelly & 1821--1906 & 2 \\
+Cyrus I. Scofield & 1843--1921 & 2 \\
+Albert Barnes & 1798--1870 & 3 \\
+John Gill & 1697--1771 & 3 \\
+John Calvin & 1509--1564 & 3 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Prompt Engineering}
 
-The system relies on three families of prompts, each iteratively refined through multiple versions:
+The deployed pipeline relies on three families of prompts, each iteratively refined through multiple versions:
 
 \begin{itemize}[nosep,leftmargin=*]
-    \item \textbf{Choicest prompts} (v0.1--v2.2): instruct the LLM to extract 1--3 verbatim quotes from a commentator's text, selecting the most ``striking, unique, and enlightening'' passages.
-    \item \textbf{BHT prompts} (v0.1--v0.8): instruct the LLM to synthesize a constrained paragraph from tiered quotes, enforcing word count, quote proportion, and stylistic rules.
-    \item \textbf{Tag commentary prompts} (v0.1--v0.7): instruct the LLM to segment multi-verse commentary into individual verse-level sections.
+    \item \textbf{Choicest} --- per-commentator quote extraction, instructing the LLM to return striking, unique, and enlightening verbatim quotes pertinent to the target verse. Separate NT and OT variants were deployed, with the OT variant tuned for longer commentary blocks and verse-range inputs.
+    \item \textbf{BHT} --- single-paragraph synthesis from the extracted quotes. A \emph{regular} variant produces a 30--70 word, 1--3 sentence paragraph grounded in the tiered quotes (deployed for NT and for 24 OT books). A \emph{split} two-stage variant (\emph{split-a} followed by \emph{split-b}) produces a short factual paragraph followed by one enriching sentence, used for the 15 narrative OT books plus a 5-book overlap with the regular pipeline.
+    \item \textbf{Tag commentary} --- verse-level indexing of raw commentary text, used during preprocessing to align commentary blocks with individual verses.
 \end{itemize}
 
-Prompt versioning enables systematic comparison of prompt effectiveness across generation runs, a form of ablation study applied to prompt design.
+\noindent A fourth family, \emph{choicest range}---designed to extract single-verse quotes from commentary covering multi-verse ranges---was developed but not ultimately used in the deployed pipeline; verse-range handling was instead addressed through the split pipeline's retrieval strategy. Prompts went through multiple iterations (recorded in the repository), with the final deployed versions used to generate the corpus served on BibleGo.org. Prompt versioning enabled systematic comparison of prompt effectiveness across generation runs, a form of ablation study applied to prompt design.
 
 \subsection{Commentary Digitization}
 
