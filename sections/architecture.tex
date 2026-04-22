@@ -111,15 +111,7 @@ John Calvin & 1509--1564 & 3 \\
 
 \subsection{Prompt Engineering}
 
-The deployed pipeline relies on three families of prompts, each iteratively refined through multiple versions:
-
-\begin{itemize}[nosep,leftmargin=*]
-    \item \textbf{Choicest} --- per-commentator quote extraction, instructing the LLM to return striking, unique, and enlightening verbatim quotes pertinent to the target verse. Separate NT and OT variants were deployed, with the OT variant tuned for longer commentary blocks and verse-range inputs.
-    \item \textbf{BHT} --- single-paragraph synthesis from the extracted quotes. A \emph{regular} variant produces a 30--80 word, 1--3 sentence paragraph grounded in the tiered quotes (deployed for NT and for 24 OT books). A \emph{split} two-stage variant (\emph{split-a} followed by \emph{split-b}) produces a short factual paragraph followed by one enriching sentence, deployed for 20 OT books (predominantly narrative), 5 of which also appear in the regular-pipeline corpus as partial experimental runs.
-    \item \textbf{Tag commentary} --- verse-level indexing of raw commentary text, used during preprocessing to align commentary blocks with individual verses.
-\end{itemize}
-
-\noindent A fourth family, \emph{choicest range}---designed to extract single-verse quotes from commentary covering multi-verse ranges---was developed but not ultimately used in the deployed pipeline; verse-range handling was instead addressed through retrieval-augmented generation (Phase~2) combined with the split pipeline for narrative OT books. Prompts went through multiple iterations (recorded in the repository), with the final deployed versions used to generate the corpus served on BibleGo.org. Prompt versioning enabled iterative comparison across generation runs, informing the qualitative lessons summarized in Section~\ref{sec:discussion}.
+The deployed pipeline relies on three families of prompts, each iteratively refined through multiple versions and recorded in the project repository: \textbf{choicest} (per-commentator quote extraction), \textbf{BHT} (single-paragraph synthesis, with both a single-pass \emph{regular} variant and a two-stage \emph{split} variant), and \textbf{tag commentary} (verse-level indexing of raw commentary text used during preprocessing). A fourth family, \emph{choicest range}, was developed to extract single-verse quotes from multi-verse commentary but did not reach the deployed pipeline; verse-range handling was instead addressed through retrieval-augmented generation (Section~\ref{sec:methods}, Phase~2) combined with the split pipeline for narrative OT books. The full prompt specifications, including the deployed word-count and quote-proportion constraints, appear in Section~\ref{sec:methods}, Phases~1 and~3.
 
 \subsection{Commentary Digitization}
 
