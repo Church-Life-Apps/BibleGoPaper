@@ -54,7 +54,7 @@ The system operates on two primary data sources:
 
 \paragraph{Biblical text.} The New American Standard Bible (NASB, 1995 edition) provides the target verse text for all 66 books of the Bible. Each verse is stored as a JSON record with chapter, verse number, and text content. The NASB was selected for its reputation as a highly literal translation, which aligns well with the commentary corpus.
 
-\paragraph{Commentary corpus.} The commentary collection comprises 14 curated commentators spanning the 16th through 20th centuries (four centuries of biblical scholarship). For the New Testament, nine commentators form the active corpus: Henry Alford, Jamieson-Fausset-Brown, Albert Barnes, Marvin Vincent, John Calvin, Philip Schaff, Archibald T. Robertson, John Gill, and John Wesley. They are organized into three tiers (Table~\ref{tab:nt-commentators}). For the Old Testament, twelve commentators are deployed: Jamieson-Fausset-Brown, Albert Barnes, John Gill, Keil \& Delitzsch, Cyrus I. Scofield, Johann P. Lange, John Calvin, William Kelly, Charles H. Mackintosh, Charles A. Coates, Arthur W. Pink, and Henri L. Rossier, similarly tiered (Table~\ref{tab:ot-commentators}). Four commentators (Jamieson-Fausset-Brown, Albert Barnes, John Gill, John Calvin) appear in both the NT and OT corpora, sometimes at different tiers.
+\paragraph{Commentary corpus.} The commentary collection comprises 14 curated commentators spanning the 16th through 20th centuries (four centuries of biblical scholarship). For the New Testament, nine commentators form the active corpus: Henry Alford, Jamieson-Fausset-Brown, Albert Barnes, Marvin Vincent, John Calvin, Philip Schaff, Archibald T. Robertson, John Gill, and John Wesley. They are organized into three tiers (Table~\ref{tab:nt-commentators}). For the Old Testament, twelve commentators are used: Jamieson-Fausset-Brown, Albert Barnes, John Gill, Keil \& Delitzsch, Cyrus I. Scofield, Johann P. Lange, John Calvin, William Kelly, Charles H. Mackintosh, Charles A. Coates, Arthur W. Pink, and Henri L. Rossier, similarly tiered (Table~\ref{tab:ot-commentators}). Four commentators (Jamieson-Fausset-Brown, Albert Barnes, John Gill, John Calvin) appear in both the NT and OT corpora, sometimes at different tiers.
 
 All commentaries were curated and vetted by a group of Christians from the Cleveland, Ohio area, ensuring theological reliability and scholarly quality.
 
@@ -111,15 +111,7 @@ John Calvin & 1509--1564 & 3 \\
 
 \subsection{Prompt Engineering}
 
-The deployed pipeline relies on three families of prompts, each iteratively refined through multiple versions:
-
-\begin{itemize}[nosep,leftmargin=*]
-    \item \textbf{Choicest} --- per-commentator quote extraction, instructing the LLM to return striking, unique, and enlightening verbatim quotes pertinent to the target verse. Separate NT and OT variants were deployed, with the OT variant tuned for longer commentary blocks and verse-range inputs.
-    \item \textbf{BHT} --- single-paragraph synthesis from the extracted quotes. A \emph{regular} variant produces a 30--80 word, 1--3 sentence paragraph grounded in the tiered quotes (deployed for NT and for 24 OT books). A \emph{split} two-stage variant (\emph{split-a} followed by \emph{split-b}) produces a short factual paragraph followed by one enriching sentence, deployed for 20 OT books (predominantly narrative), 5 of which also appear in the regular-pipeline corpus as partial experimental runs.
-    \item \textbf{Tag commentary} --- verse-level indexing of raw commentary text, used during preprocessing to align commentary blocks with individual verses.
-\end{itemize}
-
-\noindent A fourth family, \emph{choicest range}---designed to extract single-verse quotes from commentary covering multi-verse ranges---was developed but not ultimately used in the deployed pipeline; verse-range handling was instead addressed through retrieval-augmented generation (Phase~2) combined with the split pipeline for narrative OT books. Prompts went through multiple iterations (recorded in the repository), with the final deployed versions used to generate the corpus served on BibleGo.org. Prompt versioning enabled iterative comparison across generation runs, informing the qualitative lessons summarized in Section~\ref{sec:discussion}.
+The pipeline relies on three families of prompts, each iteratively refined through multiple versions and recorded in the project repository: \textbf{choicest} (per-commentator quote extraction), \textbf{BHT} (single-paragraph synthesis, with both a single-pass \emph{regular} variant and a two-stage \emph{split} variant), and \textbf{tag commentary} (verse-level indexing of raw commentary text used during preprocessing). A fourth family, \emph{choicest range}, was developed to extract single-verse quotes from multi-verse commentary but did not reach the production pipeline; verse-range handling was instead addressed through retrieval-augmented generation (Section~\ref{sec:methods}, Phase~2) combined with the split pipeline for narrative OT books. The full prompt specifications, including the word-count and quote-proportion constraints used in production, appear in Section~\ref{sec:methods}, Phases~1 and~3.
 
 \subsection{Commentary Digitization}
 
@@ -149,11 +141,11 @@ Not all commentaries in the corpus were available in digital form. Two major dig
 \node[font=\tiny\sffamily\itshape, color=tier1!60, right=0.15cm of human] {Corrected text};
 \node[font=\tiny\sffamily\itshape, color=tier1!60, right=0.15cm of consol] {Structured JSON};
 \end{tikzpicture}
-\caption{Commentary digitization pipeline used for Alford's and Govett's commentaries.}
+\caption{Commentary digitization pipeline. Numerical annotations on the diagram (page count, volunteer count, file count) refer specifically to the Alford project; Govett's \textit{Commentary on Revelation} was digitized through the same three-stage pipeline, and per-project totals for both efforts are reported in the surrounding text.}
 \label{fig:digitization}
 \end{figure}
 
-\paragraph{Govett's Commentary on Revelation.} Robert Govett's commentary on Revelation was digitized through the same volunteer-driven process, spanning 627 pages and producing 274 individual verse commentary files covering all 22 chapters. Both digitization projects followed the same three-stage pipeline, demonstrating its replicability for future commentary digitization.
+\paragraph{Govett's Commentary on Revelation.} Robert Govett's commentary on Revelation was digitized through the same volunteer-driven process, spanning 627 pages and producing 274 individual verse commentary files covering all 22 chapters; this digitization effort was completed in 2025, after the BHT generation runs reported in this paper, and is therefore not part of the corpus evaluated here. Both digitization projects followed the same three-stage pipeline, demonstrating its replicability for future commentary digitization.
 
 \subsection{Original Language Tagging}
 
