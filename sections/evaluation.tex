@@ -30,11 +30,12 @@ Verse Accuracy & --- & $0.417 \pm 0.147$ \\
 \begin{table}[htbp]
 \centering
 \small
+\setlength{\tabcolsep}{4pt}
 \caption{Realized length and sentence-count statistics per generation variant, against a prompt-level target of approximately 80 words and 2--4 sentences (with an explicit 1--3 sentence soft target in the BHT prompts). Compliance is the percentage of BHTs in that variant landing in 1--3 sentences.}
 \label{tab:length-compliance}
 \begin{tabular}{@{}lrrrr@{}}
 \toprule
-\textbf{Variant} & $n$ & \textbf{Mean words} & \textbf{Mean sent.} & \textbf{\% in 1--3 sent.} \\
+\textbf{Variant} & $n$ & \textbf{Words} & \textbf{Sent.} & \textbf{1--3 sent.} \\
 \midrule
 NT v3 & 7{,}957 & 84.2 & 4.20 & 16.9\% \\
 OT regular & 10{,}492 & 61.4 & 2.74 & 94.3\% \\
