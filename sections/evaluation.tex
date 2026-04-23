@@ -1,4 +1,4 @@
-We evaluate BibleGoAI across multiple dimensions: aggregate quality metrics, pipeline comparison, generation attempt analysis, and commentator tier contribution. All metrics are computed from the full corpus of generated BHTs: 7{,}957 New Testament verses and the full 39-book Old Testament, which is served via two complementary pipelines---a single-pass \emph{regular} pipeline (24 books, 10{,}492 verses) and a two-stage \emph{split} pipeline (20 books, 12{,}653 verses) whose two stages (\emph{split-a} and \emph{split-b}) are concatenated into a single served BHT per verse. The two pipelines overlap at the book level on 5 books (1~Kings, Esther, Habakkuk, Hosea, Micah) but cover different verses within them, so the comparison reported below is corpus-wide over each pipeline's own book set rather than a paired per-verse ablation.
+We evaluate BibleGoAI across multiple dimensions: aggregate quality metrics, pipeline comparison, generation attempt analysis, and commentator tier contribution. All metrics are computed from the full corpus of generated BHTs: 7{,}957 New Testament verses and the full 39-book Old Testament, which is served via two complementary pipelines: a single-pass \emph{regular} pipeline (24 books, 10{,}492 verses) and a two-stage \emph{split} pipeline (20 books, 12{,}653 verses) whose two stages (\emph{split-a} and \emph{split-b}) are concatenated into a single served BHT per verse. The two pipelines overlap at the book level on 5 books (1~Kings, Esther, Habakkuk, Hosea, Micah) but cover different verses within them, so the comparison reported below is corpus-wide over each pipeline's own book set rather than a paired per-verse ablation.
 
 \subsection{Aggregate Quality Metrics}
 
@@ -47,7 +47,7 @@ OT split-b & 12{,}653 & 29.5 & 1.00 & 100.0\% \\
 
 \paragraph{Verse accuracy (OT only).}
 \label{sec:verse-acc}
-The \emph{verse accuracy} metric---cosine similarity between the BHT and the target-verse embedding---was computed only for the OT corpus ($0.417 \pm 0.147$). The metric is not meaningful for the NT pipeline because NT BHTs are produced from per-verse commentary directly tied to the target verse; it exists specifically as a sanity check on the OT RAG pipeline, which must select the right span across multi-verse commentary.
+The \emph{verse accuracy} metric (cosine similarity between the BHT and the target-verse embedding) was computed only for the OT corpus ($0.417 \pm 0.147$). The metric is not meaningful for the NT pipeline because NT BHTs are produced from per-verse commentary directly tied to the target verse; it exists specifically as a sanity check on the OT RAG pipeline, which must select the right span across multi-verse commentary.
 
 \subsection{Pipeline Comparison: Regular vs.\ Split}
 \label{sec:strategy}
@@ -81,7 +81,7 @@ Quote Prop.\ (\%) & 31.8 & 32.5 \\
 
 \noindent The two pipelines produce BHTs with comparable commentary-accuracy means (1.78 vs.\ 1.82) and near-identical quote-token proportions (${\sim}32\%$), indicating comparable source-fidelity behavior. The main observable difference is length: split-pipeline BHTs are roughly 35\% longer (83 vs.\ 61 words) because the concatenation of \emph{split-a} and \emph{split-b} yields a two-paragraph output. Because the two pipelines cover different book sets, these corpus-wide means should be read as per-pipeline performance characteristics on the books each was actually run over---not as a controlled ablation.
 
-\paragraph{Stage-level view (split pipeline only).} Within the split pipeline, \emph{split-a} produces longer, higher-scoring paragraphs on its own (mean commentary-accuracy 1.935, mean word count 53.7) while \emph{split-b} produces shorter, lower-scoring enriching sentences (mean 1.710, mean word count 29.5). These are not alternative strategies---both stages always run together, and the combined served BHT is their concatenation---but the per-stage numbers illustrate the intended asymmetric roles of the two sub-prompts.
+\paragraph{Stage-level view (split pipeline only).} Within the split pipeline, \emph{split-a} produces longer, higher-scoring paragraphs on its own (mean commentary-accuracy 1.935, mean word count 53.7) while \emph{split-b} produces shorter, lower-scoring enriching sentences (mean 1.710, mean word count 29.5). These are not alternative strategies (both stages always run together, and the combined served BHT is their concatenation), but the per-stage numbers illustrate the intended asymmetric roles of the two sub-prompts.
 
 \begin{figure}[t]
 \centering
@@ -114,7 +114,7 @@ Figure~\ref{fig:tiers} shows the distribution of tier-weighted semantic similari
 
 \subsection{Commentary-Accuracy Score Distribution}
 
-Figure~\ref{fig:quality_dist} presents the distribution of commentary-accuracy scores across the NT and OT corpora. Both distributions are approximately Gaussian with a right-skew tail toward higher-scoring verses. For the NT corpus ($n{=}7{,}957$), the 5th, 25th, 50th, 75th, and 95th percentiles are 1.32, 1.68, 1.93, 2.14, and 2.46 respectively. The combined OT corpus ($n{=}35{,}798$ across regular and split pipelines) runs slightly lower: 1.29, 1.58, 1.80, 2.02, and 2.39 at the same percentiles. The minimum-acceptance threshold in the hard-constraint gate is 2.3 (Section~\ref{sec:methods}, Phase~5), which sits near the 85th percentile of produced scores---a deliberately permissive threshold reflecting the best-of-five fallback policy: if no attempt clears~2.3, the highest-scoring attempt is still retained to avoid coverage gaps. A meaningful minority of retained BHTs therefore fall below the nominal threshold, a known trade-off between full-Bible coverage and score strictness.
+Figure~\ref{fig:quality_dist} presents the distribution of commentary-accuracy scores across the NT and OT corpora. Both distributions are approximately Gaussian with a right-skew tail toward higher-scoring verses. For the NT corpus ($n{=}7{,}957$), the 5th, 25th, 50th, 75th, and 95th percentiles are 1.32, 1.68, 1.93, 2.14, and 2.46 respectively. The combined OT corpus ($n{=}35{,}798$ across regular and split pipelines) runs slightly lower: 1.29, 1.58, 1.80, 2.02, and 2.39 at the same percentiles. The minimum-acceptance threshold in the hard-constraint gate is 2.3 (Section~\ref{sec:methods}, Phase~5), which sits near the 85th percentile of produced scores, a deliberately permissive threshold reflecting the best-of-five fallback policy: if no attempt clears~2.3, the highest-scoring attempt is still retained to avoid coverage gaps. A meaningful minority of retained BHTs therefore fall below the nominal threshold, a known trade-off between full-Bible coverage and score strictness.
 
 \begin{figure}[t]
 \centering
@@ -157,4 +157,4 @@ Revelation 3:3 & 50.4 \\
 \end{tabular}
 \end{table}
 
-\noindent These human scores, combined with the automated quality metrics, provided a feedback loop that drove iterative prompt refinement---most notably the May 2024 prompt updates that shifted the choicest extraction focus from ``striking and enlightening'' to ``helpful, explanatory, and illuminating'' quotes targeting basic words and facts in each verse.
+\noindent These human scores, combined with the automated quality metrics, provided a feedback loop that drove iterative prompt refinement: most notably the May 2024 prompt updates that shifted the choicest extraction focus from ``striking and enlightening'' to ``helpful, explanatory, and illuminating'' quotes targeting basic words and facts in each verse.
