@@ -25,6 +25,25 @@ Verse Accuracy & --- & $0.417 \pm 0.147$ \\
 
 \paragraph{A note on NT word count.} The observed NT mean (84.2 words) sits just above the target upper bound (80). The generation loop runs up to five attempts per verse and, if no candidate satisfies the full set of soft constraints (30--80 words, quote-proportion, etc.), the highest-scoring attempt is retained regardless of which constraints it misses. This best-of-five fallback prioritizes commentary quality over strict length compliance, yielding a mean that slightly overshoots the 80-word upper bound; see Section~\ref{sec:methods} for the full constraint-enforcement protocol.
 
+\paragraph{Length and sentence-count compliance.} The Conciseness principle (Section~\ref{sec:introduction}) targets approximately 80 words and 2--4 sentences per BHT. Table~\ref{tab:length-compliance} reports realized statistics across the four generation variants in the corpus. NT generation consistently exceeded the 1--3 sentence prompt target (mean 4.2 sentences; 50.6\% of NT BHTs are exactly 4 sentences and 83.1\% exceed 3 sentences), while all three OT variants stayed within or below it. The split-pipeline served output (\emph{split-a} concatenated with \emph{split-b}) sums to roughly 3.3 sentences per verse on average, comparable to the regular OT pipeline's 2.7. The pattern parallels the word-count finding above: prompt-level length constraints were honored on OT but silently relaxed on NT, where the best-of-five quality-first selection appears to have favored slightly longer, multi-sentence outputs over strict constraint compliance.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Realized length and sentence-count statistics per generation variant, against a prompt-level target of approximately 80 words and 2--4 sentences (with an explicit 1--3 sentence soft target in the BHT prompts). Compliance is the percentage of BHTs in that variant landing in 1--3 sentences.}
+\label{tab:length-compliance}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Variant} & $n$ & \textbf{Mean words} & \textbf{Mean sent.} & \textbf{\% in 1--3 sent.} \\
+\midrule
+NT v3 & 7{,}957 & 84.2 & 4.20 & 16.9\% \\
+OT regular & 10{,}492 & 61.4 & 2.74 & 94.3\% \\
+OT split-a & 12{,}653 & 53.7 & 2.33 & 98.5\% \\
+OT split-b & 12{,}653 & 29.5 & 1.00 & 100.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \paragraph{Verse accuracy (OT only).}
 \label{sec:verse-acc}
 The \emph{verse accuracy} metric---cosine similarity between the BHT and the target-verse embedding---was computed only for the OT corpus in the reported results. Because the NT and OT pipelines differ (direct per-verse extraction for NT vs.\ retrieval-augmented generation for OT; see Section~\ref{sec:otchallenge}), the OT verse-accuracy value ($0.417 \pm 0.147$) should be read as a sanity check on the OT RAG pipeline rather than as directly comparable to a would-be NT value. Computing this metric retrospectively across the full NT corpus is straightforward and is noted as near-term follow-up work.
