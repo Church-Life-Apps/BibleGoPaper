@@ -47,7 +47,7 @@ OT split-b & 12{,}653 & 29.5 & 1.00 & 100.0\% \\
 
 \paragraph{Verse accuracy (OT only).}
 \label{sec:verse-acc}
-The \emph{verse accuracy} metric---cosine similarity between the BHT and the target-verse embedding---was computed only for the OT corpus in the reported results. Because the NT and OT pipelines differ (direct per-verse extraction for NT vs.\ retrieval-augmented generation for OT; see Section~\ref{sec:otchallenge}), the OT verse-accuracy value ($0.417 \pm 0.147$) should be read as a sanity check on the OT RAG pipeline rather than as directly comparable to a would-be NT value. Computing this metric retrospectively across the full NT corpus is straightforward and is noted as near-term follow-up work.
+The \emph{verse accuracy} metric---cosine similarity between the BHT and the target-verse embedding---was computed only for the OT corpus ($0.417 \pm 0.147$). The metric is not meaningful for the NT pipeline because NT BHTs are produced from per-verse commentary directly tied to the target verse; it exists specifically as a sanity check on the OT RAG pipeline, which must select the right span across multi-verse commentary.
 
 \subsection{Pipeline Comparison: Regular vs.\ Split}
 \label{sec:strategy}
