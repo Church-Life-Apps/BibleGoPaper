@@ -38,11 +38,11 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 \node[flowstep, below=of best] (fn) {\textbf{Generate footnotes}\\\scriptsize sentence $\to$ quote};
 
 % =================== ARROWS ===================
-% NT lane: straight down into shared quote extraction
-\draw[arrow] (nt.south) -- ++(0,-0.4) -| (qe.north);
-% OT lane: through retrieval, then merge into shared quote extraction
+% NT lane: down from NT box, elbow right, into Quote extraction from the left
+\draw[arrow] (nt.south) |- (qe.west);
+% OT lane: multi-verse commentary -> retrieval (vertical), then retrieval -> qe horizontally
 \draw[arrow] (ot) -- (retrieval);
-\draw[arrow] (retrieval.south) -- ++(0,-0.4) -| (qe.north);
+\draw[arrow] (retrieval.west) -- (qe.east);
 % Shared pipeline
 \draw[arrow] (qe) -- (group);
 \draw[arrow] (group) -- (gen);
