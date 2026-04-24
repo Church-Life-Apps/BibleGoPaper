@@ -15,9 +15,9 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
     lanearrow/.style={-{Stealth[length=2mm]}, line width=0.5pt, color=pipeline!55, dashed},
 ]
 % =================== STAGE 1: INPUT ROUTING (two lanes) ===================
-% Lane headers
-\node[lanehdr, color=tier1] (nthdr) at (-3.2, 0) {NT route};
-\node[lanehdr, color=tier3] (othdr) at ( 3.2, 0) {OT route};
+% Lane headers (pushed wider apart to leave room for clean horizontal arrows)
+\node[lanehdr, color=tier1] (nthdr) at (-5.5, 0) {NT route};
+\node[lanehdr, color=tier3] (othdr) at ( 5.5, 0) {OT route};
 % Lane inputs
 \node[ntstep, below=0.2cm of nthdr] (nt) {verse-level\\commentary\\\scriptsize\textit{(one passage per verse)}};
 \node[otstep, below=0.2cm of othdr] (ot) {multi-verse\\commentary\\\scriptsize\textit{(passage spans many verses)}};
@@ -31,7 +31,7 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 
 % =================== STAGE 3: RETRY LOOP ===================
 \node[decision, below=0.5cm of gen] (d1) {Passes gate\\\& score $\geq 2.3$?};
-\node[flowstep, right=1cm of d1, fill=tier3!15, draw=tier3, text width=3.0cm] (retry) {\textbf{Retry with feedback}\\\scriptsize up to 5 attempts\\\scriptsize (prior BHT + specific fixes)};
+\node[flowstep, right=2cm of d1, fill=tier3!15, draw=tier3, text width=3.0cm] (retry) {\textbf{Retry with feedback}\\\scriptsize up to 5 attempts\\\scriptsize (prior BHT + specific fixes)};
 
 % =================== STAGE 4: OUTPUT ===================
 \node[flowstep, below=0.5cm of d1] (best) {Return best-scoring\\candidate};
