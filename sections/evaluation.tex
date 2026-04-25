@@ -6,22 +6,24 @@ Table~\ref{tab:aggregate} summarizes the key metrics across the NT and OT corpor
 
 \begin{table}[htbp]
 \centering
-\small
-\caption{Aggregate BHT quality metrics across testaments. Values are mean $\pm$ standard deviation.}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{Aggregate BHT quality metrics across the three production sub-corpora: NT (single pipeline), OT regular (single-pass), and OT split (two-stage \emph{split-a}+\emph{split-b} concatenated per verse). The OT corpus as a whole spans 23{,}145 verses across all 39 books, partitioned by pipeline as shown. Commentary-accuracy and verse-accuracy scores for the split sub-corpus are per-verse means of the two stage scores; word count is the per-verse sum; quote proportion is word-count-weighted across the two stages. Values are mean $\pm$ standard deviation.}
 \label{tab:aggregate}
-\begin{tabular}{@{}lcc@{}}
+\begin{tabular}{@{}lccc@{}}
 \toprule
-\textbf{Metric} & \textbf{NT ($n{=}7{,}957$)} & \textbf{OT ($n{=}10{,}492$)} \\
+ & \textbf{NT} & \textbf{OT reg.} & \textbf{OT split} \\
+\textbf{Metric} & \textbf{(7{,}957)} & \textbf{(10{,}492)} & \textbf{(12{,}653)} \\
 \midrule
-Commentary Accuracy & $1.912 \pm 0.348$ & $1.785 \pm 0.282$ \\
-Word Count & $84.2 \pm 11.1$ & $62.9 \pm 11.6$ \\
-Quote Proportion (\%) & $39.6 \pm 7.4$ & $31.8 \pm 6.3$ \\
-Verse Accuracy & --- & $0.417 \pm 0.147$ \\
+Comm.\ Acc. & $1.91 \pm 0.35$ & $1.79 \pm 0.28$ & $1.82 \pm 0.25$ \\
+Word Count & $84.2 \pm 11.1$ & $62.9 \pm 11.6$ & $85.9 \pm 13.5$ \\
+Quote Prop.\ \% & $39.6 \pm 7.4$ & $31.8 \pm 6.3$ & $32.5 \pm 5.6$ \\
+Verse Acc. & --- & $0.42 \pm 0.15$ & $0.41 \pm 0.14$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent The NT corpus shows higher average commentary-accuracy scores (1.912 vs.\ 1.785), with longer BHTs (84 vs.\ 63 words) and higher quote proportions (39.6\% vs.\ 31.8\%). These differences are consistent with the structural contrast between the NT pipeline (verse-by-verse commentary, direct per-verse quote extraction) and the OT pipeline (multi-verse commentary, retrieval-augmented generation) described in Section~\ref{sec:methods}. Verse accuracy was computed only for the OT corpus; see below for discussion.
+\noindent The NT corpus shows higher average commentary-accuracy scores than either OT sub-corpus (1.912 vs.\ 1.785 / 1.822), with longer BHTs than OT regular (84 vs.\ 63 words) and higher quote proportions (39.6\% vs.\ 31.8\% / 32.5\%). These differences are consistent with the structural contrast between the NT pipeline (verse-by-verse commentary, direct per-verse quote extraction) and the OT pipelines (multi-verse commentary, retrieval-augmented generation) described in Section~\ref{sec:methods}. The two OT sub-corpora produce comparable commentary-accuracy and verse-accuracy means despite their structural differences; the principal observable difference is length (the split sub-corpus's per-verse word count is roughly 1.4$\times$ that of OT regular because the served output is a concatenation of two stages). Verse accuracy was computed only for the OT corpus; see below for discussion.
 
 \paragraph{A note on NT word count.} The observed NT mean (84.2 words) sits just above the target upper bound (80). The generation loop runs up to five attempts per verse and, if no candidate satisfies the full set of soft constraints (30--80 words, quote-proportion, etc.), the highest-scoring attempt is retained regardless of which constraints it misses. This best-of-five fallback prioritizes commentary quality over strict length compliance, yielding a mean that slightly overshoots the 80-word upper bound; see Section~\ref{sec:methods} for the full constraint-enforcement protocol.
 
@@ -38,9 +40,9 @@ Verse Accuracy & --- & $0.417 \pm 0.147$ \\
 \textbf{Variant} & $n$ & \textbf{Words} & \textbf{Sent.} & \textbf{1--3 sent.} \\
 \midrule
 NT v3 & 7{,}957 & 84.2 & 4.20 & 16.9\% \\
-OT regular & 10{,}492 & 61.4 & 2.74 & 94.3\% \\
-OT split-a & 12{,}653 & 53.7 & 2.33 & 98.5\% \\
-OT split-b & 12{,}653 & 29.5 & 1.00 & 100.0\% \\
+OT regular & 10{,}492 & 62.9 & 2.74 & 94.3\% \\
+OT split-a & 12{,}653 & 55.1 & 2.33 & 98.5\% \\
+OT split-b & 12{,}653 & 30.8 & 1.00 & 100.0\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -73,15 +75,15 @@ Two OT generation pipelines were built, each run once over a different subset of
 $n$ (verses) & 10{,}492 & 12{,}653 \\
 $n$ (books) & 24 & 20 \\
 Commentary Accuracy & 1.785 & 1.822 \\
-Word Count & 61.4 & 83.2 \\
+Word Count & 62.9 & 85.9 \\
 Quote Prop.\ (\%) & 31.8 & 32.5 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent The two pipelines produce BHTs with comparable commentary-accuracy means (1.78 vs.\ 1.82) and near-identical quote-token proportions (${\sim}32\%$), indicating comparable source-fidelity behavior. The main observable difference is length: split-pipeline BHTs are roughly 35\% longer (83 vs.\ 61 words) because the concatenation of \emph{split-a} and \emph{split-b} yields a two-paragraph output. Because the two pipelines cover different book sets, these corpus-wide means should be read as per-pipeline performance characteristics on the books each was actually run over---not as a controlled ablation.
+\noindent The two pipelines produce BHTs with comparable commentary-accuracy means (1.78 vs.\ 1.82) and near-identical quote-token proportions (${\sim}32\%$), indicating comparable source-fidelity behavior. The main observable difference is length: split-pipeline BHTs are roughly 37\% longer (86 vs.\ 63 words) because the concatenation of \emph{split-a} and \emph{split-b} yields a two-paragraph output. Because the two pipelines cover different book sets, these corpus-wide means should be read as per-pipeline performance characteristics on the books each was actually run over---not as a controlled ablation.
 
-\paragraph{Stage-level view (split pipeline only).} Within the split pipeline, \emph{split-a} produces longer, higher-scoring paragraphs on its own (mean commentary-accuracy 1.935, mean word count 53.7) while \emph{split-b} produces shorter, lower-scoring enriching sentences (mean 1.710, mean word count 29.5). These are not alternative strategies (both stages always run together, and the combined served BHT is their concatenation), but the per-stage numbers illustrate the intended asymmetric roles of the two sub-prompts.
+\paragraph{Stage-level view (split pipeline only).} Within the split pipeline, \emph{split-a} produces longer, higher-scoring paragraphs on its own (mean commentary-accuracy 1.935, mean word count 55.1) while \emph{split-b} produces shorter, lower-scoring enriching sentences (mean 1.710, mean word count 30.8). These are not alternative strategies (both stages always run together, and the combined served BHT is their concatenation), but the per-stage numbers illustrate the intended asymmetric roles of the two sub-prompts.
 
 \begin{figure}[t]
 \centering
@@ -103,23 +105,23 @@ The system generates up to five candidate BHTs per verse and selects the highest
 
 \subsection{Commentator Tier Contribution}
 
-Figure~\ref{fig:tiers} shows the distribution of tier-weighted semantic similarity across the three commentator tiers, expressed as the percentage of each tier's contribution to the final BHT's similarity profile (values sum to 100\% per verse, averaged across the corpus). Both testaments show a flatter distribution than the prompt's ``primarily Tier~1, sparingly Tier~2, minimally Tier~3'' instruction would suggest. NT: Tier~1 31.8\%, Tier~2 31.2\%, Tier~3 37.0\%. OT: Tier~1 35.1\%, Tier~2 29.7\%, Tier~3 35.1\%. In both corpora the Tier~3 commentators (Calvin, Gill, Wesley, and others) contribute at or above the level of Tier~1, indicating that the tier instruction is not strongly followed in the produced output. One likely cause is that several Tier~3 commentators produce longer and more thematically broad excerpts than the Tier~1 commentators, yielding higher surface-level similarity scores even when they contribute less content by intent. Reconciling the intent-based tiering with similarity-based measurement is a natural follow-up for future tuning.
+Figure~\ref{fig:tiers} shows the distribution of tier-weighted semantic similarity across the three commentator tiers, expressed as the percentage of each tier's contribution to the final BHT's similarity profile (values sum to 100\% per verse, averaged across the corpus). The NT corpus shows a flatter distribution than the prompt's ``primarily Tier~1, sparingly Tier~2, minimally Tier~3'' instruction would suggest: NT Tier~1 31.8\%, Tier~2 31.2\%, Tier~3 37.0\%. The full per-verse OT corpus follows the prompt ordering more cleanly (Tier~1 41.8\%, Tier~2 34.0\%, Tier~3 24.1\%) but is heavily influenced by the split pipeline's \emph{split-b} stage, which intentionally uses no Tier~3 commentators (Tier~3 contribution is zero by construction in split-b). For comparison, the OT regular sub-corpus alone yields Tier~1 35.1\%, Tier~2 29.7\%, Tier~3 35.1\%---a flatter distribution similar to NT. The NT result indicates the tier instruction is not strongly followed in the produced output. One likely cause is that several Tier~3 commentators produce longer and more thematically broad excerpts than the Tier~1 commentators, yielding higher surface-level similarity scores even when they contribute less content by intent. Reconciling the intent-based tiering with similarity-based measurement is a natural follow-up for future tuning.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\columnwidth]{figures/tier_breakdown.pdf}
-\caption{Average commentator-tier contribution to BHT semantic similarity, as a percentage summing to 100\% per verse. Tier~3 contributes at or above the level of Tier~1 in both corpora, indicating the tier instruction is not strongly followed in the produced output.}
+\caption{Average commentator-tier contribution to BHT semantic similarity, as a percentage summing to 100\% per verse. NT shows a flat distribution where Tier~3 contributes at or above the level of Tier~1, indicating that the tier instruction is not strongly followed. The OT per-verse curve appears to follow the prompt ordering more cleanly, but this is driven by the split pipeline's \emph{split-b} stage, which intentionally uses no Tier~3 commentators by construction.}
 \label{fig:tiers}
 \end{figure}
 
 \subsection{Commentary-Accuracy Score Distribution}
 
-Figure~\ref{fig:quality_dist} presents the distribution of commentary-accuracy scores across the NT and OT corpora. Both distributions are approximately Gaussian with a right-skew tail toward higher-scoring verses. For the NT corpus ($n{=}7{,}957$), the 5th, 25th, 50th, 75th, and 95th percentiles are 1.32, 1.68, 1.93, 2.14, and 2.46 respectively. The combined OT corpus ($n{=}35{,}798$ across regular and split pipelines) runs slightly lower: 1.29, 1.58, 1.80, 2.02, and 2.39 at the same percentiles. The retry-loop stopping threshold is a score of 2.3 (Section~\ref{sec:scoring}), which sits near the 85th percentile of produced scores. This threshold governs when generation stops, not which BHTs are retained: if no attempt ever clears~2.3, the best-scoring attempt is still kept (best-of-five fallback) to avoid coverage gaps, so a meaningful minority of retained BHTs fall below~2.3. A separate display-time cutoff on BibleGo.org (Section~\ref{sec:scoring}) hides very-low-scoring BHTs from readers while keeping them in the served corpus.
+Figure~\ref{fig:quality_dist} presents the distribution of commentary-accuracy scores across the NT and OT corpora. Both distributions are approximately Gaussian with a right-skew tail toward higher-scoring verses. For the NT corpus ($n{=}7{,}957$), the 5th, 25th, 50th, 75th, and 95th percentiles are 1.32, 1.68, 1.93, 2.14, and 2.46 respectively. The full per-verse OT corpus ($n{=}23{,}145$, with split-pipeline verses scored as the mean of their \emph{split-a} and \emph{split-b} stages) runs slightly lower: 1.37, 1.62, 1.80, 1.98, and 2.25 at the same percentiles. The retry-loop stopping threshold is a score of 2.3 (Section~\ref{sec:scoring}), which sits near the 85th percentile of NT scores and above the 95th percentile of OT per-verse scores. This threshold governs when generation stops, not which BHTs are retained: if no attempt ever clears~2.3, the best-scoring attempt is still kept (best-of-five fallback) to avoid coverage gaps, so a meaningful minority of retained BHTs fall below~2.3. A separate display-time cutoff on BibleGo.org (Section~\ref{sec:scoring}) hides very-low-scoring BHTs from readers while keeping them in the served corpus.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\columnwidth]{figures/quality_distribution.pdf}
-\caption{Distribution of commentary-accuracy scores across the NT ($n{=}7{,}957$) and OT ($n{=}35{,}798$, regular and split pipelines combined) corpora. Both distributions are approximately Gaussian with a right-skew tail; the nominal acceptance threshold (2.3) sits near the 85th percentile of produced scores.}
+\caption{Distribution of commentary-accuracy scores across the NT ($n{=}7{,}957$) and OT per-verse ($n{=}23{,}145$, split-pipeline verses scored as the mean of their two stages) corpora. Both distributions are approximately Gaussian with a right-skew tail; the nominal acceptance threshold (2.3) sits near the 85th percentile of NT scores and above the 95th percentile of OT per-verse scores.}
 \label{fig:quality_dist}
 \end{figure}
 
