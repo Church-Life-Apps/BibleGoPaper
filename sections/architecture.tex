@@ -111,7 +111,7 @@ John Calvin & 1509--1564 & 3 \\
 
 \subsection{Prompt Engineering}
 
-The pipeline relies on three families of prompts, each iteratively refined through multiple versions and recorded in the project repository: \textbf{choicest} (per-commentator quote extraction), \textbf{BHT} (single-paragraph synthesis, with both a single-pass \emph{regular} variant and a two-stage \emph{split} variant), and \textbf{tag commentary} (verse-level indexing of raw commentary text used during preprocessing). A fourth family, \emph{choicest range}, was developed to extract single-verse quotes from multi-verse commentary but did not reach the production pipeline; verse-range handling was instead addressed through retrieval-augmented generation (Section~\ref{sec:methods}, Phase~2) combined with the split pipeline for narrative OT books. The full prompt specifications, including the word-count and quote-proportion constraints used in production, appear in Section~\ref{sec:methods}, Phases~1 and~3.
+The pipeline relies on three families of prompts, each iteratively refined through multiple versions and recorded in the project repository: \textbf{choicest} (per-commentator quote extraction), \textbf{BHT} (single-paragraph synthesis, with both a single-pass \emph{regular} variant and a two-stage \emph{split} variant), and \textbf{tag commentary} (verse-level indexing of raw commentary text used during preprocessing). A fourth family, \emph{choicest range}, was developed to extract single-verse quotes from multi-verse commentary but did not reach the production pipeline; verse-range handling was instead addressed through retrieval-augmented generation (Section~\ref{sec:retrieval}) combined with the split pipeline for narrative OT books. The full prompt specifications, including the word-count and quote-proportion constraints used in production, appear in Sections~\ref{sec:quoteextraction} and~\ref{sec:bhtgen}.
 
 \subsection{Commentary Digitization}
 
@@ -156,4 +156,4 @@ A separate pipeline was developed to tag every word in the Bible with its corres
     \item \textbf{Tagged occurrence index}: 14{,}141 individual Strong's code files containing all 321{,}621 verse occurrences across the Bible, enabling reverse lookup from any Hebrew or Greek word to every verse where it appears.
 \end{itemize}
 
-\noindent A dictionary of 9{,}333 Hebrew and 5{,}564 Greek entries was also compiled, providing original-language forms, transliterations, and definitions. This tagging infrastructure powers the Word Donut feature on BibleGo.org (Section~\ref{sec:platform}) and also enabled the TAG retrieval strategy for OT BHT generation (Section~\ref{sec:methods}).
+\noindent A dictionary of 9{,}333 Hebrew and 5{,}564 Greek entries was also compiled, providing original-language forms, transliterations, and definitions. This tagging infrastructure powers the Word Donut feature on BibleGo.org (Section~\ref{sec:platform}).
