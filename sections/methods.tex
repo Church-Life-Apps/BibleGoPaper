@@ -82,9 +82,16 @@ Two additional chunking strategies were evaluated during OT development---LangCh
 \subsection{Quote Extraction}
 \label{sec:quoteextraction}
 
-Given the per-verse commentary (NT) or the retrieved chunks (OT), the system prompts GPT-3.5-turbo \citep{openai2023gpt35} once per commentator with a production \textit{choicest prompt}---v0.4 for NT, v2.2 for OT. The prompt instructs the model to extract 3--5 ``helpful, explanatory, and illuminating'' quotes that pertain to the basic words and facts of the verse, return them verbatim, and cap the total response at 500 words.
+Given the per-verse commentary (NT) or the retrieved chunks (OT), the system prompts GPT-3.5-turbo \citep{openai2023gpt35} once per commentator with a production \textit{choicest prompt}. The NT and OT pipelines use different prompt versions with materially different extraction targets:
 
-Extracted quotes are validated against the original commentary to guard against hallucinated or paraphrased content: if any quote contains tokens not present in the source text, the extraction is flagged and retried up to ten times. The resulting object, \texttt{ChoicestQuotesForVerse}, maps each commentator to their verified excerpts and becomes the input to the next stage.
+\begin{itemize}[nosep,leftmargin=*]
+    \item \textbf{NT (v0.4):} extract 1--3 ``striking, unique, and enlightening'' quotes verbatim, with each quote capped at 100 words.
+    \item \textbf{OT (v2.2):} extract 3--5 ``helpful, explanatory, and illuminating'' quotes verbatim that pertain specifically to the basic words and facts of the verse, with the total response capped at 500 words.
+\end{itemize}
+
+\noindent The OT version was tuned for the larger and more variable commentary chunks produced by retrieval (Section~\ref{sec:retrieval}), where a single chunk can span multiple verses' worth of context, so a wider quote budget is needed to capture the relevant material. Both versions require quotes to be returned verbatim and numbered for reference.
+
+Extracted quotes are validated against the original commentary to guard against hallucinated or paraphrased content: the set of tokens in the response is compared against the set of tokens in the source commentary, and if more than 2 tokens are out-of-vocabulary the extraction is flagged and re-requested up to 5 times. (A separate inner retry loop with up to 10 attempts handles transient API errors.) The resulting object, \texttt{ChoicestQuotesForVerse}, maps each commentator to their verified excerpts and becomes the input to the next stage.
 
 \subsection{Tiered Grouping}
 
@@ -103,7 +110,7 @@ Before BHT generation, the extracted quotes are grouped by commentator tier. The
 
 The core synthesis step produces a BHT from the tiered quotes. Two generation modes are available:
 
-\paragraph{Regular generation.} A single call to GPT-3.5-turbo with the \textit{BHT prompt}, which instructs the model to write a short, cohesive paragraph synthesizing the tiered quotes, with explicit per-tier weighting and a target word count. The NT production prompt (v0.8) targets ``a concise, informative, and cohesive 50-word paragraph, consisting of 2--3 sentences.'' The OT production prompt (v0.9) targets a 30--70 word, 1--3 sentence paragraph with at least 50\% of words drawn from the provided quotes.
+\paragraph{Regular generation.} A single call to GPT-3.5-turbo with the \textit{BHT prompt}, which instructs the model to write a short, cohesive paragraph synthesizing the tiered quotes, with explicit per-tier weighting and a target word count. The NT (v0.8) and OT (v0.9) production prompts both target a 30--70 word, 1--3 sentence paragraph with at least 50\% of words drawn from the provided commentary quotes; they differ only in minor wording around the framing of the explanation. The prompts also include the explicit per-tier instruction (``focus mainly on the first-tier commentary, draw sparingly from the second-tier commentary, and only pull from the third-tier commentary when absolutely necessary'').
 
 \noindent The prompt's stated targets are what is asked of the model; the hard-constraint gate that a candidate must clear to stop the retry loop (Section~\ref{sec:scoring}) is looser than the prompt targets in both word count and quote proportion, so the prompt biases the model toward the center of the acceptance window.
 
