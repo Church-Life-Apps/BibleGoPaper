@@ -15,9 +15,9 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 \node[data] (data) {NASB Bible (66 books) + Commentary Corpus (17)};
 
 % Pipeline steps - straight vertical
-\node[block, below=0.8cm of data] (extract) {1. Quote Extraction \quad {\tiny\itshape GPT-3.5}};
-\node[block, below=of extract] (retrieve) {2. Retrieval \quad {\tiny\itshape FAISS + HuggingFace}};
-\node[block, below=of retrieve] (generate) {3. BHT Generation \quad {\tiny\itshape GPT-3.5}};
+\node[block, below=0.8cm of data] (retrieve) {1. Retrieval \quad {\tiny\itshape FAISS + HuggingFace, OT only}};
+\node[block, below=of retrieve] (extract) {2. Quote Extraction \quad {\tiny\itshape GPT-3.5}};
+\node[block, below=of extract] (generate) {3. BHT Generation \quad {\tiny\itshape GPT-3.5}};
 \node[block, below=of generate] (score) {4. Scoring \& Validation \quad {\tiny\itshape USE + textstat}};
 \node[block, below=of score] (footnote) {5. Footnoting \quad {\tiny\itshape USE + token sim}};
 
@@ -25,9 +25,9 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 \node[output, below=0.8cm of footnote] (deploy) {PostgreSQL $\rightarrow$ BibleGo.org (Next.js)};
 
 % Arrows
-\draw[arrow] (data) -- (extract);
-\draw[arrow] (extract) -- (retrieve);
-\draw[arrow] (retrieve) -- (generate);
+\draw[arrow] (data) -- (retrieve);
+\draw[arrow] (retrieve) -- (extract);
+\draw[arrow] (extract) -- (generate);
 \draw[arrow] (generate) -- (score);
 \draw[arrow] (score) -- (footnote);
 \draw[arrow] (footnote) -- (deploy);
@@ -35,7 +35,7 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 % Background groups
 \begin{scope}[on background layer]
     \node[fit=(data), fill=tier1!5, draw=none, rounded corners=4pt, inner sep=5pt] {};
-    \node[fit=(extract)(retrieve)(generate)(score)(footnote), fill=pipeline!5, draw=none, rounded corners=4pt, inner sep=8pt] {};
+    \node[fit=(retrieve)(extract)(generate)(score)(footnote), fill=pipeline!5, draw=none, rounded corners=4pt, inner sep=8pt] {};
     \node[fit=(deploy), fill=accent!5, draw=none, rounded corners=4pt, inner sep=5pt] {};
 \end{scope}
 
@@ -44,7 +44,7 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
 \node[grouplabel, pipeline] at ([xshift=-0.3cm]generate.west) {Pipeline};
 \node[grouplabel, accent] at ([xshift=-0.3cm]deploy.west) {Deploy};
 \end{tikzpicture}
-\caption{End-to-end system architecture. Commentary and Bible text flow through the five-phase AI pipeline, producing scored BHTs with footnotes that are stored in PostgreSQL and served via BibleGo.org.}
+\caption{End-to-end system architecture. Commentary and Bible text flow through the five-phase AI pipeline, producing scored BHTs with footnotes that are stored in PostgreSQL and served via BibleGo.org. The retrieval phase is invoked only for the Old Testament route, where multi-verse commentary is narrowed to per-verse-relevant chunks before quote extraction; the New Testament route skips retrieval and feeds per-verse commentary directly to quote extraction (see Section~\ref{sec:methods}).}
 \label{fig:architecture}
 \end{figure}
 
@@ -111,7 +111,7 @@ John Calvin & 1509--1564 & 3 \\
 
 \subsection{Prompt Engineering}
 
-The pipeline relies on three families of prompts, each iteratively refined through multiple versions and recorded in the project repository: \textbf{choicest} (per-commentator quote extraction), \textbf{BHT} (single-paragraph synthesis, with both a single-pass \emph{regular} variant and a two-stage \emph{split} variant), and \textbf{tag commentary} (verse-level indexing of raw commentary text used during preprocessing). A fourth family, \emph{choicest range}, was developed to extract single-verse quotes from multi-verse commentary but did not reach the production pipeline; verse-range handling was instead addressed through retrieval-augmented generation (Section~\ref{sec:retrieval}) combined with the split pipeline for narrative OT books. The full prompt specifications, including the word-count and quote-proportion constraints used in production, appear in Sections~\ref{sec:quoteextraction} and~\ref{sec:bhtgen}.
+The pipeline relies on two prompt families that shipped in production, each iteratively refined through multiple versions and recorded in the project repository: \textbf{choicest} (per-commentator quote extraction) and \textbf{BHT} (single-paragraph synthesis, with both a single-pass \emph{regular} variant and a two-stage \emph{split} variant comprising separate \emph{split-a} and \emph{split-b} sub-prompts). Two further prompt families were developed during OT exploration but did not reach the production pipeline: \emph{tag commentary}, which attempted to segment multi-verse commentary into per-verse sections so that the unmodified NT pipeline could be reused (the segmentation proved insufficiently accurate even after fine-tuning; see Section~\ref{sec:methods}); and \emph{choicest range}, which attempted to extract single-verse quotes directly from multi-verse commentary. Verse-range handling was instead addressed through retrieval-augmented generation (Section~\ref{sec:retrieval}) combined with the split pipeline for narrative OT books. The full prompt specifications, including the word-count and quote-proportion constraints used in production, appear in Sections~\ref{sec:quoteextraction} and~\ref{sec:bhtgen}.
 
 \subsection{Commentary Digitization}
 

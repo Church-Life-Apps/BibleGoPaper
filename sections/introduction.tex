@@ -7,7 +7,7 @@ Modern advances in natural language processing (NLP) and large language models (
 In this paper, we present \textbf{BibleGoAI}, a multi-stage pipeline that transforms curated biblical commentary into concise, source-adherent summary paragraphs called \textit{Brief Helpful Texts} (BHTs). The name reflects the project's core value: bringing the richness of difficult-to-read commentary to the fingertips of Bible readers in an accessible way. The system is designed around three principles:
 
 \begin{enumerate}[nosep,leftmargin=*]
-    \item \textbf{Fidelity}: BHTs must be grounded in the actual words of trusted commentators, not in the LLM's own knowledge. At least 30\% of each BHT's words must originate from source quotes (with a target of 70\% and an upper bound of 90\%).
+    \item \textbf{Fidelity}: BHTs must be grounded in the actual words of trusted commentators, not in the LLM's own knowledge. The pipeline enforces this with a hard gate (20--90\% of each BHT's words must originate from source quotes) and a tighter prompt-level target (30--90\% with a 70\% target stated to the model); the realized corpus-wide proportions are reported in Section~\ref{sec:evaluation}.
     \item \textbf{Conciseness}: Each BHT is a short paragraph of roughly 80 words and a few sentences (typically 2--4; see Section~\ref{sec:evaluation} for per-pipeline distributions), making it practical for quick reference during Bible study.
     \item \textbf{Traceability}: Every claim in a BHT is linked back to its source commentary via footnotes with similarity scores, enabling readers to verify and explore further.
 \end{enumerate}

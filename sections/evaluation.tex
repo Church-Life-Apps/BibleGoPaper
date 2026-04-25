@@ -8,7 +8,7 @@ Table~\ref{tab:aggregate} summarizes the key metrics across the NT and OT corpor
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\caption{Aggregate BHT quality metrics across the three production sub-corpora: NT (single pipeline), OT regular (single-pass), and OT split (two-stage \emph{split-a}+\emph{split-b} concatenated per verse). The OT corpus as a whole spans 23{,}145 verses across all 39 books, partitioned by pipeline as shown. Commentary-accuracy and verse-accuracy scores for the split sub-corpus are per-verse means of the two stage scores; word count is the per-verse sum; quote proportion is word-count-weighted across the two stages. Values are mean $\pm$ standard deviation.}
+\caption{Aggregate BHT quality metrics across the three production sub-corpora: NT (single pipeline), OT regular (single-pass), and OT split (two-stage \emph{split-a}+\emph{split-b} concatenated per verse). The OT corpus as a whole spans 23{,}145 verses across all 39 books, partitioned by pipeline as shown. Commentary-accuracy and verse-accuracy scores for the split sub-corpus are per-verse means of the two stage scores; word count is the per-verse sum; quote proportion is word-count-weighted across the two stages. Values are mean $\pm$ standard deviation. Word counts are read from each BHT's stored \texttt{wordCount} field (computed by the pipeline's tokenizer at generation time); a re-computation by whitespace tokenization on the served text yields slightly lower values (e.g., 61.4 for OT regular and 83.2 for OT split-combined), reflecting tokenizer-vs-whitespace differences on contractions and punctuation.}
 \label{tab:aggregate}
 \begin{tabular}{@{}lccc@{}}
 \toprule
