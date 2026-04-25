@@ -13,8 +13,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
-REPO = r"C:\Users\erich\Desktop\BibleGoAI"
-FIGURES_DIR = os.path.join(REPO, "paper", "figures")
+# Default to a sibling BibleGoAI checkout; override with BIBLEGO_AI_REPO env var
+# when generating charts in a different environment.
+REPO = os.environ.get("BIBLEGO_AI_REPO", os.path.expanduser("~/BibleGoAI"))
+FIGURES_DIR = os.environ.get("BIBLEGO_PAPER_FIGURES_DIR",
+                              os.path.join(os.path.dirname(os.path.abspath(__file__)), "figures"))
 os.makedirs(FIGURES_DIR, exist_ok=True)
 
 COLORS = {
@@ -424,14 +427,53 @@ def main():
     split_b_records = load_bht_metrics(ot_split_b_dir) if os.path.exists(ot_split_b_dir) else []
     print(f"  OT Split-B records: {len(split_b_records)}")
     
+    # Build per-verse-combined OT corpus (regular + split-as-mean) so OT-corpus
+    # figures reflect the full 23,145-verse OT corpus rather than only the
+    # 10,492 regular-pipeline subset. Split per-verse score is the mean of
+    # split-a and split-b commentaryAccuracyScore (qualityScore in legacy);
+    # tier similarities are averaged element-wise; word count is summed.
+    def _key(r):
+        return (r.get('book'), r.get('chapter'), r.get('verse'))
+    sa_idx = {_key(r): r for r in split_a_records}
+    split_combined_records = []
+    for rb in split_b_records:
+        ra = sa_idx.get(_key(rb))
+        if ra is None:
+            continue
+        def _avg(a, b):
+            if a is None and b is None: return None
+            if a is None: return b
+            if b is None: return a
+            return (a + b) / 2.0
+        ts_a = ra.get('commentatorTierSimilarities')
+        ts_b = rb.get('commentatorTierSimilarities')
+        ts_combined = None
+        if ts_a and ts_b and len(ts_a) == 3 and len(ts_b) == 3:
+            ts_combined = [(ts_a[i] + ts_b[i]) / 2.0 for i in range(3)]
+        wc_a = ra.get('wordCount') or 0
+        wc_b = rb.get('wordCount') or 0
+        split_combined_records.append({
+            'book': ra.get('book'),
+            'chapter': ra.get('chapter'),
+            'verse': ra.get('verse'),
+            'qualityScore': _avg(ra.get('qualityScore'), rb.get('qualityScore')),
+            'commentaryAccuracyScore': _avg(ra.get('commentaryAccuracyScore'), rb.get('commentaryAccuracyScore')),
+            'verseAccuracyScore': _avg(ra.get('verseAccuracyScore'), rb.get('verseAccuracyScore')),
+            'wordCount': wc_a + wc_b,
+            'quoteTokenProportion': _avg(ra.get('quoteTokenProportion'), rb.get('quoteTokenProportion')),
+            'commentatorTierSimilarities': ts_combined,
+        })
+    ot_per_verse_records = ot_records + split_combined_records
+    print(f"  OT per-verse-combined records: {len(ot_per_verse_records)} (regular {len(ot_records)} + split-combined {len(split_combined_records)})")
+
     # Combine for some analyses
-    all_records = nt_records + ot_records
-    
+    all_records = nt_records + ot_per_verse_records
+
     print(f"\nTotal records loaded: {len(all_records) + len(split_a_records) + len(split_b_records)}")
     print("\n--- Generating figures ---\n")
     
     print("1. Quality Distribution (Fig 4):")
-    fig_quality_distribution(nt_records, ot_records)
+    fig_quality_distribution(nt_records, ot_per_verse_records)
     
     print("\n2. Attempt Trajectory (Fig 5):")
     fig_attempt_trajectory(all_records)
@@ -440,13 +482,16 @@ def main():
     fig_strategy_comparison(ot_records, split_a_records, split_b_records)
     
     print("\n4. Tier Breakdown (Fig 7):")
-    fig_tier_breakdown(nt_records, ot_records)
+    fig_tier_breakdown(nt_records, ot_per_verse_records)
     
     print("\n5. Cross-Model Comparison (Fig 8):")
     fig_cross_model()
     
     # Print aggregate stats
     print_aggregate_stats(nt_records, ot_records, split_a_records, split_b_records)
+    print()
+    print("=== OT per-verse-combined (regular + split-as-mean) ===")
+    print_aggregate_stats([], ot_per_verse_records, [], [])
     
     print(f"\nAll figures saved to: {FIGURES_DIR}")
     print("Done!")
