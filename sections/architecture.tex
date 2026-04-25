@@ -12,14 +12,14 @@ BibleGoAI is composed of three major subsystems: (1) a data layer housing the bi
     grouplabel/.style={font=\tiny\sffamily\bfseries, anchor=east}
 ]
 % Data sources
-\node[data] (data) {NASB Bible (66 books) + Commentary Corpus (14)};
+\node[data] (data) {NASB Bible (66 books) + Commentary Corpus (17)};
 
 % Pipeline steps - straight vertical
 \node[block, below=0.8cm of data] (extract) {1. Quote Extraction \quad {\tiny\itshape GPT-3.5}};
 \node[block, below=of extract] (retrieve) {2. Retrieval \quad {\tiny\itshape FAISS + HuggingFace}};
 \node[block, below=of retrieve] (generate) {3. BHT Generation \quad {\tiny\itshape GPT-3.5}};
 \node[block, below=of generate] (score) {4. Scoring \& Validation \quad {\tiny\itshape USE + textstat}};
-\node[block, below=of score] (footnote) {5. Footnoting + Tagging \quad {\tiny\itshape Cross-encoder}};
+\node[block, below=of score] (footnote) {5. Footnoting \quad {\tiny\itshape USE + token sim}};
 
 % Output
 \node[output, below=0.8cm of footnote] (deploy) {PostgreSQL $\rightarrow$ BibleGo.org (Next.js)};
@@ -54,7 +54,7 @@ The system operates on two primary data sources:
 
 \paragraph{Biblical text.} The New American Standard Bible (NASB, 1995 edition) provides the target verse text for all 66 books of the Bible. Each verse is stored as a JSON record with chapter, verse number, and text content. The NASB was selected for its reputation as a highly literal translation, which aligns well with the commentary corpus.
 
-\paragraph{Commentary corpus.} The commentary collection comprises 14 curated commentators spanning the 16th through 20th centuries (four centuries of biblical scholarship). For the New Testament, nine commentators form the active corpus: Henry Alford, Jamieson-Fausset-Brown, Albert Barnes, Marvin Vincent, John Calvin, Philip Schaff, Archibald T. Robertson, John Gill, and John Wesley. They are organized into three tiers (Table~\ref{tab:nt-commentators}). For the Old Testament, twelve commentators are used: Jamieson-Fausset-Brown, Albert Barnes, John Gill, Keil \& Delitzsch, Cyrus I. Scofield, Johann P. Lange, John Calvin, William Kelly, Charles H. Mackintosh, Charles A. Coates, Arthur W. Pink, and Henri L. Rossier, similarly tiered (Table~\ref{tab:ot-commentators}). Four commentators (Jamieson-Fausset-Brown, Albert Barnes, John Gill, John Calvin) appear in both the NT and OT corpora, sometimes at different tiers.
+\paragraph{Commentary corpus.} The commentary collection comprises 17 unique curated commentators (nine in the active New Testament corpus, twelve in the Old Testament corpus, with four commentators appearing in both) spanning the 16th through 20th centuries (four centuries of biblical scholarship). For the New Testament, nine commentators form the active corpus: Henry Alford, Jamieson-Fausset-Brown, Albert Barnes, Marvin Vincent, John Calvin, Philip Schaff, Archibald T. Robertson, John Gill, and John Wesley. They are organized into three tiers (Table~\ref{tab:nt-commentators}). For the Old Testament, twelve commentators are used: Jamieson-Fausset-Brown, Albert Barnes, John Gill, Keil \& Delitzsch, Cyrus I. Scofield, Johann P. Lange, John Calvin, William Kelly, Charles H. Mackintosh, Charles A. Coates, Arthur W. Pink, and Henri L. Rossier, similarly tiered (Table~\ref{tab:ot-commentators}). Four commentators (Jamieson-Fausset-Brown, Albert Barnes, John Gill, John Calvin) appear in both the NT and OT corpora, sometimes at different tiers.
 
 All commentaries were curated and vetted by a group of Christians from the Cleveland, Ohio area, ensuring theological reliability and scholarly quality.
 
