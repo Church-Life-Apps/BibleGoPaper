@@ -95,7 +95,7 @@ Extracted quotes are validated against the original commentary to guard against 
 
 \subsection{Tiered Grouping}
 
-Before BHT generation, the extracted quotes are grouped by commentator tier. The NT and OT tier assignments are defined in Section~\ref{sec:architecture} (Tables covering NT and OT tiering). This grouping drives two downstream behaviors: the BHT prompt's instruction to draw primarily from Tier~1 and sparingly from Tier~3, and the tier-weighted scoring formula (Section~\ref{sec:scoring}). The tier-steering instruction is stated explicitly in the production BHT prompt:
+Before BHT generation, the extracted quotes are grouped by commentator tier. The NT and OT tier assignments are defined in Section~\ref{sec:architecture} (Tables covering NT and OT tiering). This grouping drives two downstream behaviors: the BHT prompt's instruction to draw primarily from Tier~1, sparingly from Tier~2, and minimally from Tier~3, and the tier-weighted scoring formula (Section~\ref{sec:scoring}). The tier-steering instruction is stated explicitly in the production BHT prompt: The tier-steering instruction is stated explicitly in the production BHT prompt:
 
 \begin{quote}
 \small
@@ -136,24 +136,30 @@ Every generated BHT is measured against a hard-constraint gate and a tier-weight
 
 \paragraph{Hard-constraint gate.}
 \begin{itemize}[nosep,leftmargin=*]
-    \item \textbf{Word count.} Regular and Split-A candidates must fall within 30--80 words (strict range 20--100). Split-B candidates must fall within 15--40 words (strict range 10--50).
-    \item \textbf{Quote-word proportion.} 30\%--90\% of BHT words must originate from the provided quotes, with a target of 70\%.
+    \item \textbf{Word count.} Regular and Split-A candidates must fall within 20--100 words; Split-B candidates must fall within 10--50 words. The prompt-level targets stated to the model are tighter (30--80 words for Regular/Split-A, 15--40 for Split-B), so the gate accepts a wider window than the prompt asks for.
+    \item \textbf{Quote-word proportion.} 20\%--90\% of BHT words must originate from the provided quotes. The prompt-level target stated to the model is tighter (30--90\% with a 70\% target), so again the gate accepts a wider window than the prompt asks for.
     \item \textbf{Forbidden content.} No commentator names, verse references, or list formatting.
 \end{itemize}
 
-\paragraph{Commentary-accuracy score.} The primary continuous quality metric is a tier-weighted similarity between the BHT and the source quotes. For each commentator $c$, a per-commentator score $s_c$ is the mean of $(2 \cdot \text{semantic\_sim} + 1 \cdot \text{token\_sim})$ across every (BHT sentence $\times$ commentator quote) pair, where semantic similarity is computed with the Universal Sentence Encoder \citep{cer2018use} and token similarity with bag-of-words overlap. Per-commentator scores are then averaged within tier ($t_1$, $t_2$, $t_3$), and combined with tier weights:
+\paragraph{Commentary-accuracy score.} The primary continuous quality metric is a tier-weighted similarity between the BHT and the source quotes, augmented by a quote-availability bonus that rewards verses with broader tier coverage. For each commentator $c$, a per-commentator score $s_c$ is the mean of $(2 \cdot \text{semantic\_sim} + 1 \cdot \text{token\_sim})$ across every (BHT sentence $\times$ commentator quote) pair, where semantic similarity is computed with the Universal Sentence Encoder \citep{cer2018use} and token similarity with bag-of-words overlap. Per-commentator scores are then averaged within tier ($t_1$, $t_2$, $t_3$) and combined into a tier-weighted similarity:
 
 \[
-\text{score} = \frac{3 \cdot t_1 + 2 \cdot t_2 + 1 \cdot t_3}{W}
+\text{sim} = \frac{3 \cdot t_1 + 2 \cdot t_2 + 1 \cdot t_3}{W},
 \]
 
-\noindent where $W$ is the sum of tier weights (3, 2, 1) restricted to tiers that had data for the verse. A verse with commentary in all three tiers is scored out of $W=6$; a verse with only Tier~1 data is scored out of $W=3$. This normalization makes scores comparable across verses with different tier coverage.
+\noindent where $W$ is the sum of tier weights (3, 2, 1) restricted to tiers that had data for the verse. A verse with commentary in all three tiers is scored out of $W=6$; a verse with only Tier~1 data is scored out of $W=3$. This normalization makes the similarity term comparable across verses with different tier coverage. The final score combines this similarity with a quote-availability bonus that rewards verses with more commentators contributing quotes:
+
+\[
+\text{score} = 2 \cdot \text{sim} + \frac{3 \cdot n_1 + 2 \cdot n_2 + 1 \cdot n_3}{19},
+\]
+
+\noindent where $n_t$ is the number of commentators in tier $t$ that contributed a non-empty choicest extraction for the verse, and 19 is the maximum-coverage normalizer used in the implementation. The bonus is bounded above by 1 (when every commentator in every tier contributes), so the final score sits roughly in $[0, 3]$ where the similarity term dominates and the availability term acts as a tiebreaker that favors verses with broader source backing. The 2.3 retry-loop stop threshold and the 1.0/2.0 display-cutoff thresholds discussed below all refer to this composite score.
 
 \paragraph{Acceptance-vs-retention semantics.} A score of 2.3 is the retry-loop stopping threshold: if a candidate clears all hard constraints and scores $\geq 2.3$, the retry loop terminates on that attempt. It is not a filter on what enters the corpus---as noted above, the best-scoring candidate is retained even when no attempt reached 2.3. On the BibleGo.org reader, a separate \emph{display-time} cutoff decides whether to surface a BHT to readers: BHTs with score $< 1.0$ are always hidden, and BHTs with score $< 2.0$ are hidden when the verse has fewer than three total commentary sources available. Hidden BHTs are replaced with the message: \textit{``Sorry, no help text for this verse --- may the Lord give you wisdom!''}
 
-\paragraph{Single-score design.} The tier-weighted similarity described above is the only continuous metric used for BHT selection, retry-loop gating, and display-cutoff decisions. Within a single BHT record, it is emitted as both \texttt{commentaryAccuracyScore} and \texttt{qualityScore} (the latter retained for legacy API consumers). The value surfaced to the BibleGo reader as \texttt{bhtScore} is identical to these for regular BHTs; for Split-A/Split-B composite BHTs, \texttt{bhtScore} is the arithmetic mean of the Split-A and Split-B \texttt{commentaryAccuracyScore}s, since no single record spans the concatenated output.
+\paragraph{Single-score design.} The composite score described above is the only continuous metric used for BHT selection, retry-loop gating, and display-cutoff decisions. Within a single BHT record, it is emitted as both \texttt{commentaryAccuracyScore} and \texttt{qualityScore}. The value surfaced to the BibleGo reader as \texttt{bhtScore} is identical to these for regular BHTs; for Split-A/Split-B composite BHTs, \texttt{bhtScore} is the arithmetic mean of the Split-A and Split-B \texttt{commentaryAccuracyScore}s, since no single record spans the concatenated output.
 
-\paragraph{Diagnostic metrics.} In addition to the commentary-accuracy score, the pipeline logs several metrics used for offline corpus analysis but not for BHT selection: readability indices (Flesch Reading Ease, Flesch-Kincaid Grade, Gunning Fog, Automated Readability Index, Dale-Chall; \citealt{kincaid1975readability, gunning1952fog}), tier-contribution percentages, and quote-token proportion. These are logged per BHT for the aggregate analyses in Section~\ref{sec:evaluation} but are never inputs to selection, retry gating, or display-cutoff decisions.
+\paragraph{Diagnostic metrics.} Several auxiliary metrics are logged per BHT for offline corpus analysis but are not used for selection, retry gating, or display-cutoff decisions. These include readability indices (Flesch Reading Ease, Flesch-Kincaid Grade, Gunning Fog, Automated Readability Index, Dale-Chall; \citealt{flesch1948readability, kincaid1975readability, gunning1952fog, senter1967ari, dalechall1948}), tier-contribution percentages, and quote-token proportion. Early in scoring development we tested each of the five readability indices as a candidate component of the composite quality score; in qualitative review of the resulting BHTs, readability-weighted scoring favored more polished prose at the expense of source adherence (the design objective the pipeline was built to enforce), so the indices were retained as side statistics rather than promoted into the selection score, and were eventually dropped from active validation analysis altogether.
 
 \subsection{Footnoting}
 \label{sec:footnoting}
