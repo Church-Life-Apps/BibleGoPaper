@@ -20,10 +20,6 @@ on:
       - 'paper.pdf'
       - '.github/workflows/build-paper.yml'
 
-# Allow the workflow to commit back to the branch
-permissions:
-  contents: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -51,22 +47,3 @@ jobs:
           name: paper-pdf
           path: paper.pdf
           retention-days: 30
-
-      - name: Commit updated paper.pdf if changed
-        # Only commit on pushes and same-repo PRs (fork PRs can't push back)
-        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # Compare against committed paper.pdf — if identical, exit early (idempotent)
-          # This is what prevents an infinite loop: the workflow re-runs after an auto-commit,
-          # but the re-build produces the same PDF, so this step no-ops.
-          if git diff --quiet paper.pdf; then
-            echo "paper.pdf is unchanged; nothing to commit."
-            exit 0
-          fi
-
-          git add paper.pdf
-          git commit -m "Auto-build paper.pdf"
-          git push
