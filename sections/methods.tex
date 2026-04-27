@@ -19,8 +19,8 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 \node[lanehdr, color=tier1] (nthdr) at (-5.5, 0) {NT route};
 \node[lanehdr, color=tier3] (othdr) at ( 5.5, 0) {OT route};
 % Lane inputs
-\node[ntstep, below=0.2cm of nthdr] (nt) {verse-level\\commentary\\\scriptsize\textit{(one passage per verse)}};
-\node[otstep, below=0.2cm of othdr] (ot) {multi-verse\\commentary\\\scriptsize\textit{(passage spans many verses)}};
+\node[ntstep, below=0.2cm of nthdr] (nt) {verse-level\\commentary};
+\node[otstep, below=0.2cm of othdr] (ot) {multi-verse\\commentary};
 % OT-only retrieval step
 \node[otbox, below=0.35cm of ot] (retrieval) {Retrieve relevant chunks\\\scriptsize (vector search, top-$k$)};
 
@@ -64,8 +64,8 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 The pipeline branches on input structure at the first stage:
 
 \begin{itemize}[nosep,leftmargin=*]
-    \item \textbf{NT route.} Commentators write verse-by-verse, so each verse's commentary can be extracted from the corpus directly and handed to the quote-extraction stage unchanged.
-    \item \textbf{OT route.} Commentators write on multi-verse passages, so the relevant subset of each passage must first be retrieved for the target verse. Only after retrieval narrows the input does quote extraction run.
+    \item \textbf{NT route.} Commentators tend to write verse-by-verse, so each verse's commentary can be extracted from the corpus directly and handed to the quote-extraction stage unchanged.
+    \item \textbf{OT route.} Commentators tend to write on multi-verse passages, so the relevant subset of each passage must first be retrieved for the target verse. Only after retrieval narrows the input does quote extraction run.
 \end{itemize}
 
 \noindent After this branching, both routes converge on the same downstream stages. Sections~\ref{sec:retrieval}--\ref{sec:footnoting} describe those stages in order.
@@ -95,11 +95,11 @@ Extracted quotes are validated against the original commentary to guard against 
 
 \subsection{Tiered Grouping}
 
-Before BHT generation, the extracted quotes are grouped by commentator tier. The NT and OT tier assignments are defined in Section~\ref{sec:architecture} (Tables covering NT and OT tiering). This grouping drives two downstream behaviors: the BHT prompt's instruction to draw primarily from Tier~1, sparingly from Tier~2, and minimally from Tier~3, and the tier-weighted scoring formula (Section~\ref{sec:scoring}). The tier-steering instruction is stated explicitly in the production BHT prompt: The tier-steering instruction is stated explicitly in the production BHT prompt:
+Before BHT generation, the extracted quotes are grouped by commentator tier (NT and OT tier assignments are defined in Section~\ref{sec:architecture}). The grouping drives two downstream behaviors: it shapes the BHT prompt's tier-steering instruction (which directs the model to draw primarily from Tier~1, sparingly from Tier~2, and minimally from Tier~3), and it feeds the tier-weighted scoring formula (Section~\ref{sec:scoring}). The exact prompt language appears in Section~\ref{sec:bhtgen} alongside the BHT prompt itself.
 
 \begin{quote}
 \small
-\textit{``You will be given the commentary quotes in three ``tiers''. Please focus mainly on the first-tier commentary, draw sparingly from the second-tier commentary, and only pull from the third-tier commentary when absolutely necessary.''}
+
 
 \vspace{0.1em}
 \raggedleft --- excerpt from \texttt{bht prompt v0.9} (OT production)
@@ -110,7 +110,12 @@ Before BHT generation, the extracted quotes are grouped by commentator tier. The
 
 The core synthesis step produces a BHT from the tiered quotes. Two generation modes are available:
 
-\paragraph{Regular generation.} A single call to GPT-3.5-turbo with the \textit{BHT prompt}, which instructs the model to write a short, cohesive paragraph synthesizing the tiered quotes, with explicit per-tier weighting and a target word count. The NT (v0.8) and OT (v0.9) production prompts both target a 30--70 word, 1--3 sentence paragraph with at least 50\% of words drawn from the provided commentary quotes; they differ only in minor wording around the framing of the explanation. The prompts also include the explicit per-tier instruction (``focus mainly on the first-tier commentary, draw sparingly from the second-tier commentary, and only pull from the third-tier commentary when absolutely necessary'').
+\paragraph{Regular generation.} A single call to GPT-3.5-turbo with the \textit{BHT prompt}, which instructs the model to write a short, cohesive paragraph synthesizing the tiered quotes. The NT (v0.8) and OT (v0.9) production prompts both target a 30--70 word, 1--3 sentence paragraph with at least 50\% of words drawn from the provided commentary quotes; they differ only in minor wording around the framing of the explanation. The core task framing is stated up front in the prompt:
+
+\begin{quote}
+\textit{``Your job is to read Bible commentary quotes and use them to write a short helpful paragraph explaining a Bible verse based on the quotes. The goal of this paragraph is to aid a reader's basic understanding of the words and facts in the verse based on what the given commentaries say about it. Do not merely copy the quotes. Write a new paragraph but use as much of the commentators' own words as possible to reflect their explanations about the verse.''}
+\end{quote}
+\noindent (excerpt from \texttt{bht prompt v0.9}, OT production).
 
 \noindent The prompt's stated targets are what is asked of the model; the hard-constraint gate that a candidate must clear to stop the retry loop (Section~\ref{sec:scoring}) is looser than the prompt targets in both word count and quote proportion, so the prompt biases the model toward the center of the acceptance window.
 
@@ -141,7 +146,7 @@ Every generated BHT is measured against a hard-constraint gate and a tier-weight
     \item \textbf{Forbidden content.} No commentator names, verse references, or list formatting.
 \end{itemize}
 
-\paragraph{Commentary-accuracy score.} The primary continuous quality metric is a tier-weighted similarity between the BHT and the source quotes, augmented by a quote-availability bonus that rewards verses with broader tier coverage. For each commentator $c$, a per-commentator score $s_c$ is the mean of $(2 \cdot \text{semantic\_sim} + 1 \cdot \text{token\_sim})$ across every (BHT sentence $\times$ commentator quote) pair, where semantic similarity is computed with the Universal Sentence Encoder \citep{cer2018use} and token similarity with bag-of-words overlap. Per-commentator scores are then averaged within tier ($t_1$, $t_2$, $t_3$) and combined into a tier-weighted similarity:
+\paragraph{Commentary-accuracy score.} The primary continuous quality metric is a tier-weighted similarity between the BHT and the source quotes, augmented by a quote-availability bonus that rewards verses with broader tier coverage. For each commentator $c$, a per-commentator score $s_c$ is the mean of $(2 \cdot \text{semantic\_sim} + 1 \cdot \text{token\_sim})$ across every (BHT sentence $\times$ commentator quote) pair. Here \emph{semantic\_sim} is the cosine similarity between the sentence and quote embeddings produced by the Universal Sentence Encoder \citep{cer2018use}, and \emph{token\_sim} is the Jaccard index of their lemmatized, stopword-filtered token sets. Per-commentator scores are then averaged within tier ($t_1$, $t_2$, $t_3$) and combined into a tier-weighted similarity:
 
 \[
 \text{sim} = \frac{3 \cdot t_1 + 2 \cdot t_2 + 1 \cdot t_3}{W},
@@ -155,16 +160,16 @@ Every generated BHT is measured against a hard-constraint gate and a tier-weight
 
 \noindent where $n_t$ is the number of commentators in tier $t$ that contributed a non-empty choicest extraction for the verse, and 19 is the maximum-coverage normalizer used in the implementation. The bonus is bounded above by 1 (when every commentator in every tier contributes), so the final score sits roughly in $[0, 3]$ where the similarity term dominates and the availability term acts as a tiebreaker that favors verses with broader source backing. The 2.3 retry-loop stop threshold and the 1.0/2.0 display-cutoff thresholds discussed below all refer to this composite score.
 
-\paragraph{Acceptance-vs-retention semantics.} A score of 2.3 is the retry-loop stopping threshold: if a candidate clears all hard constraints and scores $\geq 2.3$, the retry loop terminates on that attempt. It is not a filter on what enters the corpus---as noted above, the best-scoring candidate is retained even when no attempt reached 2.3. On the BibleGo.org reader, a separate \emph{display-time} cutoff decides whether to surface a BHT to readers: BHTs with score $< 1.0$ are always hidden, and BHTs with score $< 2.0$ are hidden when the verse has fewer than three total commentary sources available. Hidden BHTs are replaced with the message: \textit{``Sorry, no help text for this verse --- may the Lord give you wisdom!''}
+\paragraph{Acceptance-vs-retention semantics.} A score of 2.3 is the retry-loop stopping threshold: if a candidate clears all hard constraints and scores $\geq 2.3$, the retry loop terminates on that attempt. It is not a filter on what enters the corpus---as noted above, the best-scoring candidate is retained even when no attempt reached 2.3. On the BibleGo.org reader, a separate \emph{display-time} cutoff decides whether to surface a BHT to readers: BHTs with score $< 1.0$ are always hidden, and BHTs with score $< 2.0$ are hidden when the verse has fewer than three total commentary sources available. Across the served corpus, these two rules combined hide approximately 1.4\% of verses. Hidden BHTs are replaced with the message: \textit{``Sorry, no help text for this verse --- may the Lord give you wisdom!''}
 
-\paragraph{Single-score design.} The composite score described above is the only continuous metric used for BHT selection, retry-loop gating, and display-cutoff decisions. Within a single BHT record, it is emitted as both \texttt{commentaryAccuracyScore} and \texttt{qualityScore}. The value surfaced to the BibleGo reader as \texttt{bhtScore} is identical to these for regular BHTs; for Split-A/Split-B composite BHTs, \texttt{bhtScore} is the arithmetic mean of the Split-A and Split-B \texttt{commentaryAccuracyScore}s, since no single record spans the concatenated output.
+\paragraph{Single-score design.} Reducing all quality signals to a single continuous metric is deliberate: it enables direct comparison and ranking across BHTs, which is what the retry-loop's best-of-five selection, the display-time cutoffs, and the cross-pipeline evaluation in Section~\ref{sec:evaluation} all rely on. Auxiliary diagnostic metrics are kept separate to preserve this property.
 
 \paragraph{Diagnostic metrics.} Several auxiliary metrics are logged per BHT for offline corpus analysis but are not used for selection, retry gating, or display-cutoff decisions. These include readability indices (Flesch Reading Ease, Flesch-Kincaid Grade, Gunning Fog, Automated Readability Index, Dale-Chall; \citealt{flesch1948readability, kincaid1975readability, gunning1952fog, senter1967ari, dalechall1948}), tier-contribution percentages, and quote-token proportion. Early in scoring development we tested each of the five readability indices as a candidate component of the composite quality score; in qualitative review of the resulting BHTs, readability-weighted scoring favored more polished prose at the expense of source adherence (the design objective the pipeline was built to enforce), so the indices were retained as side statistics rather than promoted into the selection score, and were eventually dropped from active validation analysis altogether.
 
 \subsection{Footnoting}
 \label{sec:footnoting}
 
-Once a BHT is selected, provenance links are generated between BHT content and source commentary. The footnoter reuses the same similarity computation as the commentary-accuracy score (Section~\ref{sec:scoring}): for every pair (BHT sentence $\times$ commentator's choicest quote), it computes $2 \cdot \text{semantic\_sim} + 1 \cdot \text{token\_sim}$, where semantic similarity is from the Universal Sentence Encoder and token similarity is bag-of-words overlap. Pairs scoring below 1.0 are discarded; the survivors are grouped by BHT sentence and sorted in descending score order, and the top entries per sentence are retained as that sentence's footnote list. Each footnote records the commentator, the quote index, the similarity score, and the byte offset where the quote appears in the commentator's original text (found via a substring matcher tolerant to minor token insertions). These annotations drive the expandable BHT sentence $\to$ source-quote navigation on BibleGo.org.
+Once a BHT is selected, provenance links are generated between BHT content and source commentary. The footnoter reuses the same per-sentence-per-quote similarity score as the commentary-accuracy computation (Section~\ref{sec:scoring}). Pairs scoring below 1.0 are discarded; the survivors are grouped by BHT sentence and sorted in descending score order, and the top entries per sentence are retained as that sentence's footnote list. Each footnote records the commentator, the quote index, the similarity score, and the byte offset where the quote appears in the commentator's original text (found via a substring matcher tolerant to minor token insertions). These annotations drive the expandable BHT sentence $\to$ source-quote navigation on BibleGo.org.
 
 To make the pipeline concrete, Figure~\ref{fig:bhtexample} shows a real BHT from the production corpus along with the metadata recorded during generation and an example footnote link.
 
@@ -219,7 +224,7 @@ The NT route was built first. Commentators in the NT corpus write verse-by-verse
 When the team turned to the OT after the public release of NT BHTs, the structural difference of OT commentary broke this assumption: OT commentators typically discuss passages spanning multiple verses, and feeding an entire multi-verse passage to the choicest prompt produced quotes that were off-topic for any specific verse. Two adaptations were explored before the current retrieval-based route stabilized:
 
 \begin{enumerate}[nosep,leftmargin=*]
-    \item \textbf{Per-verse tagging.} An experiment that asked GPT to segment multi-verse commentary into per-verse sections (via a dedicated ``tag commentary'' prompt), which could then feed the unmodified NT pipeline. The segmentation proved inconsistent at scale---roughly 50\% accuracy on internal evaluation, where the downstream pipeline needed $\sim$95\% to be usable (errors in tagging compound through retrieval and quote extraction, so a half-correct segmentation yields substantially worse than half-correct BHTs). Fine-tuning GPT-3.5-turbo on the tagging task via OpenAI's hosted fine-tuning API raised accuracy to roughly 60\%---a measurable but nowhere-near-sufficient gain---and the tagging route was not adopted. The tagging code remains in the repository but is not invoked in the production OT run.
+    \item \textbf{Per-verse tagging.} An experiment that asked GPT to segment multi-verse commentary into per-verse sections (via a dedicated ``tag commentary'' prompt), which could then feed the unmodified NT pipeline. The segmentation proved inconsistent at scale, with roughly 50\% accuracy on internal evaluation; the downstream pipeline needed $\sim$95\% to be usable (errors in tagging compound through retrieval and quote extraction, so a half-correct segmentation yields substantially worse than half-correct BHTs). Fine-tuning GPT-3.5-turbo on the tagging task via OpenAI's hosted fine-tuning API raised accuracy to roughly 60\%, a measurable but nowhere-near-sufficient gain, and the tagging route was not adopted. The tagging code remains in the repository but is not invoked in the production OT run.
     \item \textbf{Enhanced choicest extraction.} A modified choicest prompt that asked the model to isolate verse-specific quotes from longer passages without segmentation. This also proved unreliable---the model struggled to filter verse-relevant content from long narrative passages.
 \end{enumerate}
 
