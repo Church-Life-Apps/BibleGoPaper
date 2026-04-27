@@ -21,11 +21,12 @@ The BibleGoAI pipeline transforms raw multi-author biblical commentary into conc
 % Lane inputs
 \node[ntstep, below=0.2cm of nthdr] (nt) {verse-level\\commentary};
 \node[otstep, below=0.2cm of othdr] (ot) {multi-verse\\commentary};
-% OT-only retrieval step
-\node[otbox, below=0.35cm of ot] (retrieval) {Retrieve relevant chunks\\\scriptsize (vector search, top-$k$)};
+% Shared pipeline center, positioned first so OT retrieval can align to it
+\node[flowstep, below=1.25cm of $(nt)!0.5!(ot)$] (qe) {\textbf{Quote extraction}\\\scriptsize 3--5 quotes per commentator};
+% OT-only retrieval step, vertically aligned with Quote extraction so the OT->QE arrow is horizontal
+\node[otbox] at (qe -| ot) (retrieval) {Retrieve relevant chunks\\\scriptsize (vector search, top-$k$)};
 
 % =================== STAGE 2: SHARED PIPELINE (centered) ===================
-\node[flowstep, below=1.25cm of $(nt)!0.5!(ot)$] (qe) {\textbf{Quote extraction}\\\scriptsize 3--5 quotes per commentator};
 \node[flowstep, below=of qe] (group) {\textbf{Group by tier}\\\scriptsize Tier 1 / 2 / 3};
 \node[flowstep, below=of group] (gen) {\textbf{BHT generation}\\\scriptsize regular or split variant};
 
