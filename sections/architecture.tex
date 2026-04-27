@@ -54,13 +54,13 @@ The system operates on two primary data sources:
 
 \paragraph{Biblical text.} The New American Standard Bible (NASB, 1995 edition) provides the target verse text for all 66 books of the Bible. Each verse is stored as a JSON record with chapter, verse number, and text content. The NASB was selected for its reputation as a highly literal translation, which aligns well with the commentary corpus.
 
-\paragraph{Commentary corpus.} The commentary collection comprises 17 unique curated commentators (nine in the active New Testament corpus, twelve in the Old Testament corpus, with four commentators appearing in both) spanning the 16th through 20th centuries (four centuries of biblical scholarship). For the New Testament, nine commentators form the active corpus: Henry Alford, Jamieson-Fausset-Brown, Albert Barnes, Marvin Vincent, John Calvin, Philip Schaff, Archibald T. Robertson, John Gill, and John Wesley. They are organized into three tiers (Table~\ref{tab:nt-commentators}). For the Old Testament, twelve commentators are used: Jamieson-Fausset-Brown, Albert Barnes, John Gill, Keil \& Delitzsch, Cyrus I. Scofield, Johann P. Lange, John Calvin, William Kelly, Charles H. Mackintosh, Charles A. Coates, Arthur W. Pink, and Henri L. Rossier, similarly tiered (Table~\ref{tab:ot-commentators}). Four commentators (Jamieson-Fausset-Brown, Albert Barnes, John Gill, John Calvin) appear in both the NT and OT corpora, sometimes at different tiers.
+\paragraph{Commentary corpus.} The commentary corpus comprises 17 unique curated commentators. The corpus is split into NT-active and OT-active subsets --- nine commentators in the NT corpus and twelve in the OT corpus, with four commentators appearing in both (sometimes at different tiers). Both subsets are organized into three tiers; full lists with tier assignments and date ranges appear in Tables~\ref{tab:nt-commentators} and~\ref{tab:ot-commentators}.
 
-All commentaries were curated and vetted by a group of Christians from the Cleveland, Ohio area, based on their general helpfulness for Bible study.
+The commentary corpus was selected through round-table discussions among the project's volunteer contributors, drawing on their accumulated study experience to assess each commentator's helpfulness for verse-level Bible study.
 
 \subsection{Commentator Tiering}
 
-The tiering system serves a critical role in the generation process. When synthesizing a BHT, the LLM is instructed to draw \textit{primarily} from Tier~1 commentators, \textit{sparingly} from Tier~2, and \textit{minimally} from Tier~3. This weighted approach ensures that the most trusted and comprehensive commentators dominate the output while allowing supplementary perspectives to enrich the synthesis. Tables~\ref{tab:nt-commentators} and~\ref{tab:ot-commentators} list the active NT and OT commentators with their tier assignments and approximate date ranges.
+The tiering system serves a critical role in the generation process. When synthesizing a BHT, the LLM is instructed to draw \textit{primarily} from Tier~1 commentators, \textit{sparingly} from Tier~2, and \textit{minimally} from Tier~3. The primary motivation is to counteract a recency bias observed in the LLM's outputs, where later-listed commentators disproportionately influenced the synthesis; explicit tier weighting allows us to control which commentators dominate independent of their position in the prompt. Tier assignments themselves were determined through round-table discussions among the project's volunteer contributors, drawing on their study experience to assess each commentator's value for verse-level Bible study (a judgment that often favored commentators with strong original-language word study). Tables~\ref{tab:nt-commentators} and~\ref{tab:ot-commentators} list the active NT and OT commentators with their tier assignments and approximate date ranges.
 
 \begin{table}[htbp]
 \centering
@@ -71,15 +71,15 @@ The tiering system serves a critical role in the generation process. When synthe
 \toprule
 \textbf{Commentator} & \textbf{Era} & \textbf{Tier} \\
 \midrule
-Henry Alford & 1810--1871 & 1 \\
-Jamieson, Fausset \& Brown & 1871 & 1 \\
-Marvin R. Vincent & 1834--1922 & 1 \\
-Archibald T. Robertson & 1863--1934 & 1 \\
-Albert Barnes & 1798--1870 & 2 \\
-Philip Schaff & 1819--1893 & 2 \\
-John Wesley & 1703--1791 & 3 \\
-John Gill & 1697--1771 & 3 \\
-John Calvin & 1509--1564 & 3 \\
+Henry Alford & 19th c. & 1 \\
+Jamieson, Fausset \& Brown & 19th c. & 1 \\
+Marvin R. Vincent & 19th--20th c. & 1 \\
+Archibald T. Robertson & 19th--20th c. & 1 \\
+Albert Barnes & 18th--19th c. & 2 \\
+Philip Schaff & 19th c. & 2 \\
+John Wesley & 18th c. & 3 \\
+John Gill & 17th--18th c. & 3 \\
+John Calvin & 16th c. & 3 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -93,31 +93,31 @@ John Calvin & 1509--1564 & 3 \\
 \toprule
 \textbf{Commentator} & \textbf{Era} & \textbf{Tier} \\
 \midrule
-Keil \& Delitzsch & 1807--1890 & 1 \\
-Arthur W. Pink & 1886--1952 & 1 \\
-Henri L. Rossier & 1835--1928 & 1 \\
-Charles A. Coates & 1862--1945 & 1 \\
-Charles H. Mackintosh & 1820--1896 & 1 \\
-Jamieson, Fausset \& Brown & 1871 & 2 \\
-Johann P. Lange & 1802--1884 & 2 \\
-William Kelly & 1821--1906 & 2 \\
-Cyrus I. Scofield & 1843--1921 & 2 \\
-Albert Barnes & 1798--1870 & 3 \\
-John Gill & 1697--1771 & 3 \\
-John Calvin & 1509--1564 & 3 \\
+Keil \& Delitzsch & 19th c. & 1 \\
+Arthur W. Pink & 19th--20th c. & 1 \\
+Henri L. Rossier & 19th--20th c. & 1 \\
+Charles A. Coates & 19th--20th c. & 1 \\
+Charles H. Mackintosh & 19th c. & 1 \\
+Jamieson, Fausset \& Brown & 19th c. & 2 \\
+Johann P. Lange & 19th c. & 2 \\
+William Kelly & 19th--20th c. & 2 \\
+Cyrus I. Scofield & 19th--20th c. & 2 \\
+Albert Barnes & 18th--19th c. & 3 \\
+John Gill & 17th--18th c. & 3 \\
+John Calvin & 16th c. & 3 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsection{Prompt Engineering}
 
-The pipeline relies on two prompt families that shipped in production, each iteratively refined through multiple versions and recorded in the project repository: \textbf{choicest} (per-commentator quote extraction) and \textbf{BHT} (single-paragraph synthesis, with both a single-pass \emph{regular} variant and a two-stage \emph{split} variant comprising separate \emph{split-a} and \emph{split-b} sub-prompts). Two further prompt families were developed during OT exploration but did not reach the production pipeline: \emph{tag commentary}, which attempted to segment multi-verse commentary into per-verse sections so that the unmodified NT pipeline could be reused (the segmentation proved insufficiently accurate even after fine-tuning; see Section~\ref{sec:methods}); and \emph{choicest range}, which attempted to extract single-verse quotes directly from multi-verse commentary. Verse-range handling was instead addressed through retrieval-augmented generation (Section~\ref{sec:retrieval}) combined with the split pipeline for narrative OT books. The full prompt specifications, including the word-count and quote-proportion constraints used in production, appear in Sections~\ref{sec:quoteextraction} and~\ref{sec:bhtgen}.
+The pipeline relies on two prompt families that shipped in production, each iteratively refined through multiple versions and recorded in the project repository: \textbf{choicest} (per-commentator quote extraction) and \textbf{BHT} (single-paragraph synthesis, with both a single-pass \emph{regular} variant and a two-stage \emph{split} variant comprising separate \emph{split-a} and \emph{split-b} sub-prompts). Two further prompt families were developed during OT exploration but did not reach the production pipeline: \emph{tag commentary}, which attempted to segment multi-verse commentary into per-verse sections so that the unmodified NT pipeline could be reused (the segmentation was not accurate enough for production use even after fine-tuning; see Section~\ref{sec:methods}); and \emph{choicest range}, which attempted to extract single-verse quotes directly from multi-verse commentary. Verse-range handling was instead addressed through retrieval-augmented generation (Section~\ref{sec:retrieval}) combined with the split pipeline for narrative OT books. The full prompt specifications, including the word-count and quote-proportion constraints used in production, appear in Sections~\ref{sec:quoteextraction} and~\ref{sec:bhtgen}.
 
 \subsection{Commentary Digitization}
 
 Not all commentaries in the corpus were available in digital form. Two major digitization efforts were undertaken by volunteers to expand the commentary corpus:
 
-\paragraph{Alford's New Testament for English Readers.} Henry Alford's four-volume commentary (1868--1872) was digitized from physical book scans totaling 2{,}544 pages across all 27 New Testament books. The pipeline (Figure~\ref{fig:digitization}) consisted of three stages: (1)~\textit{extraction} via Tesseract OCR and Google Cloud Vision, converting scanned pages to text; (2)~\textit{human correction}, in which 28 volunteers spent hundreds of hours reviewing and correcting OCR errors through a coordinated Google Drive spreadsheet; and (3)~\textit{automated consolidation}, which detected chapter boundaries, parsed verse-level commentary, performed spell-checking, and produced structured output files. This effort represents a significant scholarly contribution independent of the AI pipeline.
+\paragraph{Alford's New Testament for English Readers.} Henry Alford's four-volume commentary (1868--1872) was digitized from physical book scans totaling 2{,}544 pages across all 27 New Testament books. The pipeline (Figure~\ref{fig:digitization}) consisted of three stages: (1)~\textit{extraction} via Tesseract OCR, converting scanned pages to text; (2)~\textit{human correction}, in which 28 volunteers spent hundreds of hours reviewing and correcting OCR errors through a coordinated Google Drive spreadsheet; and (3)~\textit{automated consolidation}, which detected chapter boundaries, parsed verse-level commentary, performed spell-checking, and produced structured output files. This effort represents a significant scholarly contribution independent of the AI pipeline.
 
 % --- DIGITIZATION PIPELINE DIAGRAM ---
 \begin{figure}[t]
@@ -128,7 +128,7 @@ Not all commentaries in the corpus were available in digital form. Two major dig
     digarrow/.style={-{Stealth[length=2mm]}, line width=0.5pt, color=tier1!60},
 ]
 \node[digbox] (scan) {Book Scans\\(2{,}544 pages)};
-\node[digbox, below=of scan] (ocr) {Tesseract OCR +\\Google Cloud Vision};
+\node[digbox, below=of scan] (ocr) {Tesseract OCR};
 \node[digbox, below=of ocr] (human) {28 Volunteers\\(Google Drive)};
 \node[digbox, below=of human] (consol) {Automated\\Consolidation};
 
@@ -141,19 +141,19 @@ Not all commentaries in the corpus were available in digital form. Two major dig
 \node[font=\tiny\sffamily\itshape, color=tier1!60, right=0.15cm of human] {Corrected text};
 \node[font=\tiny\sffamily\itshape, color=tier1!60, right=0.15cm of consol] {Structured JSON};
 \end{tikzpicture}
-\caption{Commentary digitization pipeline. Numerical annotations on the diagram (page count, volunteer count, file count) refer specifically to the Alford project; Govett's \textit{Commentary on Revelation} was digitized through the same three-stage pipeline, and per-project totals for both efforts are reported in the surrounding text.}
+\caption{Commentary digitization pipeline. Numerical annotations on the diagram (page count, volunteer count, file count) refer specifically to the Alford project; Govett's \textit{Commentary on Revelation} was digitized through a similar three-stage pipeline, and per-project totals for both efforts are reported in the surrounding text.}
 \label{fig:digitization}
 \end{figure}
 
-\paragraph{Govett's Commentary on Revelation.} Robert Govett's commentary on Revelation was digitized through the same volunteer-driven process, spanning 627 pages and producing 274 individual verse commentary files covering all 22 chapters; this digitization effort was completed in 2025, after the BHT generation runs reported in this paper, and is therefore not part of the corpus evaluated here. Both digitization projects followed the same three-stage pipeline, demonstrating its replicability for future commentary digitization.
+\paragraph{Govett's Commentary on Revelation.} Robert Govett's commentary on Revelation was digitized through a similar volunteer-driven process, spanning 627 pages and producing 274 individual verse commentary files covering all 22 chapters; this digitization effort was completed in 2025, after the BHT generation runs reported in this paper, and is therefore not part of the corpus evaluated here.
 
 \subsection{Original Language Tagging}
 
-A separate pipeline was developed to tag every word in the Bible with its corresponding Hebrew or Greek Strong's concordance number. The raw NASB text, with original-language tags provided courtesy of the NASB, was processed through a dedicated parser that produced two outputs:
+NASB provides Strong's concordance tagging that links each English word to its underlying Hebrew or Greek root. A separate pipeline was developed to clean this manual tagging and aggregate it into structured outputs for downstream use. The raw NASB text, with original-language tags provided courtesy of the NASB, was processed through a dedicated parser that produced two outputs:
 
 \begin{itemize}[nosep,leftmargin=*]
     \item \textbf{Bible tagged files}: 66 JSON files (one per book), where each English word is linked to its Strong's code (e.g., ``beginning'' $\rightarrow$ H7225).
     \item \textbf{Tagged occurrence index}: 14{,}141 individual Strong's code files containing all 321{,}621 verse occurrences across the Bible, enabling reverse lookup from any Hebrew or Greek word to every verse where it appears.
 \end{itemize}
 
-\noindent A dictionary of 9{,}333 Hebrew and 5{,}564 Greek entries was also compiled, providing original-language forms, transliterations, and definitions. This tagging infrastructure powers the Word Donut feature on BibleGo.org (Section~\ref{sec:platform}).
+\noindent A dictionary of 9{,}333 Hebrew and 5{,}564 Greek entries was also compiled, providing original-language forms, transliterations, and definitions. This tagging infrastructure supports downstream original-language word study (Section~\ref{sec:platform}).
